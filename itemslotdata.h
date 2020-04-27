@@ -1,28 +1,40 @@
-class PlayerHolderSub { 
+/*
+ItemSlotData is the class that handles data from ItemSlot.bin / ItemSlotTable.slt
+A pointer to an instance of this class is stored at 0x809c3670 PAL
+See also http://wiki.tockdom.com/wiki/Filesystem/Race/Common.szs/ItemSlot.bin
+*/
+
+class PlayerHolderSub { // This'll get moved once I figure out what it is properly or write up PlayerHolder info
 public: 
-  ~PlayerHolderSub() // 8021a144 PAL
-  PlayerHolderSub() // 8021a0f0 PAL
+  virtual ~PlayerHolderSub(); // 8021a144 PAL
+  PlayerHolderSub(); // 8021a0f0 PAL
   
   void * unknown_0x4;
   void * unknown_0x8;
   void * unknown_0xC;
 };
 
-class ItemSlotData : public PlayerHolderSub { // 808d27b4 vtable
-public:
-  virtual ~ItemSlotData(); // 807ba650 PAL
-
-  ItemSlotTableHolder playerChances;
-  ItemSlotTableHolder cpuChances;
-  ItemSlotTableHolder specialChances;
-  undefined * rowRecord;
-  undefined * perColumnRowRecords;
-  // unknown 0x30-33
-  unsigned int[4] unknown_0x34; // can't remember why I thought this was an array, might be wrong
-  unsigned int playerCount; // copied from the global variable by constructor
-};
-
 typedef struct {
   unsigned int columns;
   short * data;
 } ItemSlotTableHolder;
+
+class ItemSlotData : public PlayerHolderSub { // 808d27b4 vtable
+public:
+  virtual ~ItemSlotData(); // 807ba650 PAL
+  int decideItem(int itemboxSetting, int position, int r6, int r7, void * r8); // 807bb42c PAL
+  byte * processTableAndIter(byte * itemTable, ItemSlotTableHolder tableHolder, int r6, int r7); // 807ba9d8 PAL
+  // Always constructed inline
+  
+  ItemSlotTableHolder playerChances;
+  ItemSlotTableHolder cpuChances;
+  ItemSlotTableHolder specialChances;
+
+  // Not too sure about these fields yet, I'll give better names & stuff once I research them more
+  undefined * rowRecord; 
+  undefined * perColumnRowRecords;
+  
+  // unknown 0x30-33
+  unsigned int[4] unknown_0x34; // can't remember why I thought this was an array, might be wrong
+  unsigned int playerCount; // copied from the global variable by constructor
+};
