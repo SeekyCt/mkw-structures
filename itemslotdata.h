@@ -23,7 +23,7 @@ class ItemSlotData : public PlayerHolderSub { // 808d27b4 vtable
 public:
   virtual ~ItemSlotData(); // 807ba650 PAL
   int decideItem(int itemboxSetting, int position, int r6, int r7, void * r8); // 807bb42c PAL
-  byte * processTableAndIter(byte * itemTable, ItemSlotTableHolder tableHolder, int r6, int r7); // 807ba9d8 PAL
+  byte * processTableAndIter(byte * itemTable, ItemSlotTableHolder tableHolder, int r6, int r7); // 807ba9d8 PAL, takes a pointer to a raw table in an item slot file, processes the values and writes them to the data field of the table holder, then returns the pointer to the start of the next table
   // Always constructed inline
   
   ItemSlotTableHolder playerChances;
