@@ -65,26 +65,42 @@ typedef struct {
   uint32_t unknown_0x30;
 } RacedataSettings;
 
+class RacedataPlayer {
+    virtual ~RacedataPlayer(); // 8052DC68 PAL
+    RacedataPlayer(); // 8052d96c PAL
+    
+    // vtable 808b3294 PAL
+    uint8_t unknown_0x4;
+    uint8_t unknown_0x5;
+    uint8_t unknown_0x6;
+    uint8_t unknown_0x7; // possibly padding
+    uint32_t vehicleId; // http://wiki.tockdom.com/wiki/List_of_Identifiers#Vehicles
+    uint32_t characterId; // http://wiki.tockdom.com/wiki/List_of_Identifiers#Characters
+    uint32_t unknown_0x10;
+    // Start of some other class inside of it, length is uncertain
+    // The rest is unknown, total size is 0xf0 bytes
+};
+
 class RacedataScenario {
   virtual ~RacedataScenario();
-  RacedataScenario(RacedataBigThing * bigThing); // 8052dbc8, never used afaik (Racedata's constructor does it inline)
+  RacedataScenario(RacedataBigThing * bigThing); // 8052dbc8 PAL, never used afaik (Racedata's constructor does it inline)
 
   // vtable 808b3288 PAL
   uint8_t playerCount;
   // unknown 0x5-7, 6 & 7 might be padding but 5 is set to 0 in constructor
-  RacedataPlayer[12] players;
+  RacedataPlayer players[12];
   RacedataSettings settings;
   KMTFile mission; // http://wiki.tockdom.com/wiki/Mission_Mode#mission_single.kmt
   RacedataBigThing * bigThing; // Scenario 0 points to big thing 0, 1 to 1, 2 to null
-}
+};
 
 class RacedataMain {
   // Always constructed inline, functions seem to always be members of Racedata rather than specifically RacedataMain
 
   //vtable 808b3260 PAL (empty)  
-  RacedataScenario[3] scenarios; // 0 is in race, 1 is in menu, not sure what 2 is
-  RacedataBigThing[2] bigThings; // 0x2800 struct, memset to 0 on construction, not seen any code use them yet
-}
+  RacedataScenario scenarios[3]; // 0 is in race, 1 is in menu, not sure what 2 is
+  RacedataBigThing bigThings[2]; // 0x2800 struct, memset to 0 on construction, not seen any code use them yet
+};
 
 class Racedata : public ParameterFile { // https://github.com/riidefi/MKWDecompilation/blob/master/Static/System/ParameterFile.hpp with /boot/menuset.prm parameter file
 public:
@@ -97,4 +113,4 @@ public:
   
   // vtable 808b3268 PAL
   RacedataMain main; // 0x1c bytes in
-}
+};
