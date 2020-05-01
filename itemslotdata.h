@@ -13,12 +13,12 @@ public:
   void * unknown_0x4;
   void * unknown_0x8;
   void * unknown_0xC;
-};
+}; // Total size 0x10
 
 typedef struct {
   unsigned int columns;
   short * data;
-} ItemSlotTableHolder;
+} ItemSlotTableHolder; // Total size 0x8
 
 class ItemSlotData : public PlayerHolderSub {
 public:
@@ -39,4 +39,4 @@ public:
   // unknown 0x30-33
   unsigned int[4] unknown_0x34; // can't remember why I thought this was an array, might be wrong
   unsigned int playerCount; // copied from the global variable by constructor, used to check when the player count changes online
-};
+}; // Total size 0x48
