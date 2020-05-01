@@ -38,7 +38,7 @@ class RaceinfoPlayer {
   uint8_t currentKCP;
   uint8_t maxKCP;
   // unknown 0x29-37
-  uint32_t stateFlags;
+  uint32_t stateFlags; // bit flags:
     /*
       64 is coming last animation?
       32 is finishing the race?
@@ -47,8 +47,10 @@ class RaceinfoPlayer {
       2 is end of race camera
       1 is in race?
     */
-   void * unknown_0x3c;
-   // 0x40-53 unknown
+  void * unknown_0x3c;
+  // 0x40-47 unknown
+  ControllerHolder * controllerHolder; // see inputdata.h
+  // 0x4c-53 unknown
 }; // Total size 0x54
 
 class Raceinfo {
