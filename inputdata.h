@@ -5,16 +5,38 @@ A pointer to an instance of this class is stored at 0x809bd70c PAL
 
 class InputState {
   // vtable 808b2f2c PAL
-  uint16_t unknown_0x4; // stores button presses in some form
-  uint16_t unknown_0x6; // stores button presses in some form
+  uint16_t buttonActions; // bit flags:
+    /* 
+      0x1 = accelerate
+      0x2 = brake + reverse (used for SSMT)
+      0x4 = use item
+      0x8 = hop + drift
+      0x20 = rear-view camera
+    */
+  uint16_t buttonRaw; // bit flags:
+    /*
+      0x1 - d-pad left
+      0x2 - d-pad right
+      0x4 - d-pad down
+      0x8 - d-pad up
+      0x10 - Bumper (C / Z)
+      0x20 - Right Trigger
+      0x40 - Left Trigger
+      0x100 - A
+      0x200 - B
+      0x400 - X
+      0x800 - Y
+      0x1000 - Start
+    */
   float stickX; // -1.0 to 1.0
   float stickY; // -1.0 to 1.0
   uint8_t quantisedStickX; // 0-14
   uint8_t quantisedStickY; // 0-14
   uint8_t motionControlFlick; // 1 up, 2 down, 3 left, 4 right; includes the first frame of d-pad presses
   uint8_t motionControlFlick2; // not sure what the difference is from the other one
-  // unknown 0x14-17
-};
+  uint8_t unknown_0x14;
+  // unknown 0x15-17 - seem to be padding
+}; // Total size 0x18
 
 class ControllerHolder {
   virtual ~ControllerHolder(); // 805222b4 PAL
