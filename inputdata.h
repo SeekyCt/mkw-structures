@@ -3,6 +3,19 @@ InputData is the class that handles all controller inputs
 A pointer to an instance of this class is stored at 0x809bd70c PAL
 */
 
+class InputState {
+  // vtable 808b2f2c PAL
+  uint16_t unknown_0x4; // stores button presses in some form
+  uint16_t unknown_0x6; // stores button presses in some form
+  float stickX; // -1.0 to 1.0
+  float stickY; // -1.0 to 1.0
+  uint8_t quantisedStickX; // 0-14
+  uint8_t quantisedStickY; // 0-14
+  uint8_t motionControlFlick; // 1 up, 2 down, 3 left, 4 right; includes the first frame of d-pad presses
+  uint8_t motionControlFlick2; // not sure what the difference is from the other one
+  // unknown 0x14-17
+};
+
 class ControllerHolder {
   virtual ~ControllerHolder(); // 805222b4 PAL
   virtual unknown1(); // 80521198 PAL
@@ -14,8 +27,10 @@ class ControllerHolder {
   ControllerHolder(); // 80520f64 PAL - inlined in RealControllerHolder()
 
   // vtable 808b2dd8 PAL
-  // I've not documented this yet but if you use a RAM viewer and play around with a controller you can find what you want pretty easily
-} // Total size 0xd8
+  // unknown 0x4-27;
+  InputState inputStates[2]; // 0 is current frame, 1 is previous
+  // unknown 0x58-d7
+}; // Total size 0xd8
 
 class RealControllerHolder : public ControllerHolder {
   virtual ~RealControllerHolder(); // 805222f4 PAL
