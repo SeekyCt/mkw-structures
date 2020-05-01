@@ -10,11 +10,11 @@ class Random { // I'll move this at some point
   
   // vtable 808b42e0 PAL
   // 0x4-17 is unknown
-}
+}; // Total size 0x18
 
 class RaceinfoRandom : public Random {
   RaceinfoRandom(int param_2);
-}
+}; // Total size 0x18
 
 class RaceinfoPlayer {
   ~RaceinfoPlayer(); // 80532f48 PAL
@@ -49,7 +49,7 @@ class RaceinfoPlayer {
     */
    void * unknown_0x3c;
    // 0x40-53 unknown
-}
+}; // Total size 0x54
 
 class Raceinfo {
   virtual ~Raceinfo(); // 80532e3c PAL
@@ -81,4 +81,4 @@ class Raceinfo {
   float unknown_0x44;
   uint8_t unknown_0x45;
   // unknown 0x49-4b
-};
+}; // Total size 0x4c
