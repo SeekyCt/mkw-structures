@@ -72,7 +72,7 @@ class RacedataPlayer {
     // vtable 808b3294 PAL
     uint8_t unknown_0x4;
     uint8_t unknown_0x5;
-    uint8_t unknown_0x6;
+    int8_t controllerId; // id of the controller at the console for this player, -1 if not controlled by one
     uint8_t unknown_0x7; // possibly padding
     uint32_t vehicleId; // http://wiki.tockdom.com/wiki/List_of_Identifiers#Vehicles
     uint32_t characterId; // http://wiki.tockdom.com/wiki/List_of_Identifiers#Characters
