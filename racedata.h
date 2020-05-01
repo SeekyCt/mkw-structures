@@ -63,7 +63,7 @@ typedef struct {
   uint32_t mirrorModeAndSomeOtherStuff; // bit flags, 0x1 is mirror mode, others unknown
   uint32_t unknown_0x2c;
   uint32_t unknown_0x30;
-} RacedataSettings;
+} RacedataSettings; // Total size 0x34
 
 class RacedataPlayer {
     virtual ~RacedataPlayer(); // 8052DC68 PAL
@@ -79,7 +79,7 @@ class RacedataPlayer {
     uint32_t unknown_0x10;
     // Start of some other class inside of it, length is uncertain
     // The rest is unknown, total size is 0xf0 bytes
-};
+}; // Total size 0xf0
 
 class RacedataScenario {
   virtual ~RacedataScenario();
@@ -90,9 +90,9 @@ class RacedataScenario {
   // unknown 0x5-7, 6 & 7 might be padding but 5 is set to 0 in constructor
   RacedataPlayer players[12];
   RacedataSettings settings;
-  KMTFile mission; // http://wiki.tockdom.com/wiki/Mission_Mode#mission_single.kmt
+  KMTFile mission; // http://wiki.tockdom.com/wiki/Mission_Mode#mission_single.kmt - size is 0x70
   RacedataBigThing * bigThing; // Scenario 0 points to big thing 0, 1 to 1, 2 to null
-};
+}; // Total size 0xbf0
 
 class RacedataMain {
   // Always constructed inline, functions seem to always be members of Racedata rather than specifically RacedataMain
@@ -100,7 +100,7 @@ class RacedataMain {
   //vtable 808b3260 PAL (empty)  
   RacedataScenario scenarios[3]; // 0 is in race, 1 is in menu, not sure what 2 is
   RacedataBigThing bigThings[2]; // 0x2800 struct, memset to 0 on construction, not seen any code use them yet
-};
+}; // Total size 0x73d4
 
 class Racedata : public ParameterFile { // https://github.com/riidefi/MKWDecompilation/blob/master/Static/System/ParameterFile.hpp with /boot/menuset.prm parameter file
 public:
@@ -113,4 +113,4 @@ public:
   
   // vtable 808b3268 PAL
   RacedataMain main; // 0x1c bytes in
-};
+}; // Total size 0x73f0
