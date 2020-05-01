@@ -6,6 +6,7 @@ Thanks to _tZ and Kevin for help with this
 
 class Random { // I'll move this at some point
   virtual ~Random; // 80555538 PAL
+  Random(); // 80555464 PAL
   int next(int limit); // 805555cc PAL
   
   // vtable 808b42e0 PAL
