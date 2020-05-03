@@ -5,6 +5,11 @@ TheLordScruffy helped massively with this
 */
 
 typedef enum : int {
+    TEAM_RED,
+    TEAM_BLUE
+} Team;
+
+typedef enum : int {
     BATTLE_BALLOON,
     BATTLE_COIN
 } BattleType;
@@ -77,8 +82,12 @@ class RacedataPlayer {
     uint32_t vehicleId; // http://wiki.tockdom.com/wiki/List_of_Identifiers#Vehicles
     uint32_t characterId; // http://wiki.tockdom.com/wiki/List_of_Identifiers#Characters
     uint32_t unknown_0x10;
-    // Start of some other class inside of it, length is uncertain
-    // The rest is unknown, total size is 0xf0 bytes
+    // Unknown 0x10-cb
+    Team team;
+    // Unknown 0xd0-d7
+    uint16_t previousScore;
+    uint16_t score;
+    // Unknown 0xdc-f0
 }; // Total size 0xf0
 
 class RacedataScenario {
