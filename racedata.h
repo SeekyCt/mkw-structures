@@ -65,7 +65,11 @@ typedef struct {
   uint8_t unknown_0x25;
   uint8_t unknown_0x26;
   uint8_t unknown_0x27;
-  uint32_t mirrorModeAndSomeOtherStuff; // bit flags, 0x1 is mirror mode, others unknown
+  uint32_t modeFlags; // bit flags:
+    /*
+      2 is teams enabled
+      1 is mirror mode
+    */
   uint32_t unknown_0x2c;
   uint32_t unknown_0x30;
 } RacedataSettings; // Total size 0x34
