@@ -33,7 +33,7 @@ public:
   ItemSlotTableHolder specialChances;
 
   // Not too sure about these fields yet, I'll give better names & stuff once I research them more
-  undefined * rowRecord; 
+  undefined * rowRecord; // possibly what's used to determine which items are in the random thing while it spins?
   undefined * perColumnRowRecords;
   
   // unknown 0x30-33
