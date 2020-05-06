@@ -31,10 +31,8 @@ public:
   ItemSlotTableHolder playerChances;
   ItemSlotTableHolder cpuChances;
   ItemSlotTableHolder specialChances;
-
-  // Not too sure about these fields yet, I'll give better names & stuff once I research them more
-  undefined * rowRecord; // possibly what's used to determine which items are in the random thing while it spins?
-  undefined * perColumnRowRecords;
+  int * itemsInWheel; // first int is number of items, followed by the item ids (visual only, doesn't stop you pulling other items)
+  int * specialBoxItemsInWheel; // a series of lists in same structure as itemsInWheel, one for each column of the special table
   
   // unknown 0x30-33
   unsigned int[4] unknown_0x34; // can't remember why I thought this was an array, might be wrong
