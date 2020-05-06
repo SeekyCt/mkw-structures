@@ -34,7 +34,6 @@ public:
   ItemSlotTableHolder specialChances;
   int * itemsInWheel; // first int is number of items, followed by the item ids (visual only, doesn't stop you pulling other items)
   int * specialBoxItemsInWheel; // a series of lists in same structure as itemsInWheel, one for each column of the special table
-  
   // unknown 0x30-33
   unsigned int[4] unknown_0x34; // can't remember why I thought this was an array, might be wrong
   unsigned int playerCount; // copied from the global variable by constructor, used to check when the player count changes online
