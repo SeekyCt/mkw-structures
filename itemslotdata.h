@@ -35,6 +35,6 @@ public:
   int * itemsInWheel; // first int is number of items, followed by the item ids (visual only, doesn't stop you pulling other items)
   int * specialBoxItemsInWheel; // a series of lists in same structure as itemsInWheel, one for each column of the special table
   // unknown 0x30-33
-  unsigned int[4] unknown_0x34; // can't remember why I thought this was an array, might be wrong
+  unsigned int[4] itemSpawnTimers; // timers in frames for when an item can next be pulled. 0 = lightning, 1 = unused?, 2 = blooper, 3 = pow
   unsigned int playerCount; // copied from the global variable by constructor, used to check when the player count changes online
 }; // Total size 0x48
