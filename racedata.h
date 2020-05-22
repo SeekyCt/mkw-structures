@@ -62,7 +62,7 @@ typedef struct {
   uint8_t hudPlayerIds[4];
   uint32_t cupId; // http://wiki.tockdom.com/wiki/List_of_Identifiers#Cups
   uint8_t raceNumber; // resets at 100 for some reason
-  uint8_t unknown_0x25;
+  uint8_t lapCount;
   uint8_t unknown_0x26;
   uint8_t unknown_0x27;
   uint32_t modeFlags; // bit flags:
