@@ -5,6 +5,15 @@ TheLordScruffy helped massively with this
 */
 
 typedef enum : int {
+    PLAYER_REAL_LOCAL,
+    PLAYER_CPU,
+    PLAYER_UNKNOWN2,
+    PLAYER_UNKNOWN3,
+    PLAYER_REAL_ONLINE,
+    PLAYER_NONE
+} PlayerType;
+
+typedef enum : int {
     TEAM_RED,
     TEAM_BLUE
 } Team;
@@ -85,7 +94,7 @@ class RacedataPlayer {
     uint8_t unknown_0x7; // possibly padding
     uint32_t vehicleId; // http://wiki.tockdom.com/wiki/List_of_Identifiers#Vehicles
     uint32_t characterId; // http://wiki.tockdom.com/wiki/List_of_Identifiers#Characters
-    uint32_t playerType; // 0 = real, 1 = cpu, 5 = not playing
+    PlayerType playerType;
     // Unknown 0x10-cb
     Team team;
     // Unknown 0xd0-d7
