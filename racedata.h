@@ -1,14 +1,14 @@
 /*
 Racedata is the class that holds the information to set up a race, such as the gamemode and the characters each player chose
 A pointer to an instance of this class is stored at 0x809bd728 PAL
-TheLordScruffy helped massively with this
+TheLordScruffy helped massively with this, WhatIsLoaf found the ghost player type
 */
 
 typedef enum : int {
     PLAYER_REAL_LOCAL,
     PLAYER_CPU,
     PLAYER_UNKNOWN2,
-    PLAYER_UNKNOWN3,
+    PLAYER_GHOST,
     PLAYER_REAL_ONLINE,
     PLAYER_NONE
 } PlayerType;
@@ -100,7 +100,11 @@ class RacedataPlayer {
     // Unknown 0xd0-d7
     uint16_t previousScore;
     uint16_t score;
-    // Unknown 0xdc-f0
+    // Unknown 0xdc-e0
+    uint8_t prevFinishPos;
+    // unknown 0xe2-e7
+    int16_t rating; // vr or br, depending on mode
+    // unknown 0xea-ef
 }; // Total size 0xf0
 
 class RacedataScenario {
@@ -113,7 +117,7 @@ class RacedataScenario {
   RacedataPlayer players[12];
   RacedataSettings settings;
   KMTFile mission; // http://wiki.tockdom.com/wiki/Mission_Mode#mission_single.kmt - size is 0x70
-  RacedataBigThing * bigThing; // Scenario 0 points to big thing 0, 1 to 1, 2 to null
+  RKGFile * ghost; // Scenario 0 points to the one you race, 1 points to one I'm not sure about, 2 points to null
 }; // Total size 0xbf0
 
 class RacedataMain {
@@ -121,7 +125,7 @@ class RacedataMain {
 
   //vtable 808b3260 PAL (empty)  
   RacedataScenario scenarios[3]; // 0 is in race, 1 is in menu, not sure what 2 is
-  RacedataBigThing bigThings[2]; // 0x2800 struct, memset to 0 on construction, not seen any code use them yet
+  RKGFile ghosts[2]; // 0x2800 size each, 0 is the one you're racing, not sure what 1 is, see http://wiki.tockdom.com/wiki/RKG_(File_Format)
 }; // Total size 0x73d4
 
 class Racedata : public ParameterFile { // https://github.com/riidefi/MKWDecompilation/blob/master/Static/System/ParameterFile.hpp with /boot/menuset.prm parameter file
