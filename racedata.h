@@ -109,7 +109,7 @@ class RacedataPlayer {
 
 class RacedataScenario {
   virtual ~RacedataScenario();
-  RacedataScenario(RacedataBigThing * bigThing); // 8052dbc8 PAL, never used afaik (Racedata's constructor does it inline)
+  RacedataScenario(RKGFile * ghost); // 8052dbc8 PAL, never used afaik (Racedata's constructor does it inline)
 
   // vtable 808b3288 PAL
   uint8_t playerCount;
