@@ -64,7 +64,7 @@ class RealControllerHolder : public ControllerHolder {
   RealControllerHolder(); // PAL 805220bc
   
   // vtable 808b2d90 PAL
-  void * unknown_0xd8; // 0x2774 struct
+  void * rkgInputBuffer; // 0x2774 byte buffer for storing a controller input section of an RKG file
   // unknown 0xdc-e7  
   void * unknown_0xe8; // 0x1c class with constructor 80524ac4 PAL
 }; // Total size 0xec
