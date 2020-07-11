@@ -19,7 +19,7 @@ public:
   void * packet; // data buffer pointer
   uint32_t bufferSize; // maximum data size
   uint32_t packetSize; // current data size
-} PacketHolder;
+} PacketHolder; // Total size 0xc
 
 class SplitRACEPointers {
 public:
@@ -34,7 +34,7 @@ public:
   PacketHolder * user;
   PacketHolder * item;
   PacketHolder * event;
-};
+}; // Total size 0x20
 
 typedef struct {
   uint8_t playersAtConsole
