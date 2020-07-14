@@ -70,7 +70,7 @@ public:
   uint32_t getSplitSendPacketsTotalSize(uint32_t aid); // 806580c4 PAL
   void handleError(); // 806581cc PAL
   void resetSubs(); // 80658d3c PAL
-  bool isConnectedToAnyone; // 80656f00 PAL
+  bool isConnectedToAnyone(); // 80656f00 PAL
   void mainLoop(int r4, int r5, int r6); // 80657504 PAL
   void processPlayerDisconnect(uint32_t aid); // 80658990 PAL
   void processRACEPacket(uint32_t aid, void * packet, uint32_t size); // 80659a84 PAL
