@@ -107,7 +107,7 @@ public:
   RKNetFriend friends[30];
   bool friendsListIsChanged; // true if unprocessed changes have happeend
   bool shutdownScheduled; // will cause shutdown of wifi connection on next run of the main loop if true
-  bool friendStatusesHaveUpdates; // true if unprocessed updates have been received
+  bool friendStatusUpdateScheduled; // if true, the main loop will update all friend statuses on the next iteration
   uint8_t unknown_0x2757
   char profanityCheckResult; // 1 if name is bad
   // unknown 0x2759-275b
