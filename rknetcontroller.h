@@ -128,5 +128,5 @@ void RKNet::userRecvCallback(uint32_t aid, void * packet, uint32_t size); // 806
 
 void * RKNet::DWCAlloc(int r3, uint32_t size, int alignment); // 80658500 PAL
 void RKNet::DWCFree(int r3, void * buffer); // 8065858c PAL
-void RKNet::SOAlloc(int r3, void * buffer); // 80658418 PAL
+void * RKNet::SOAlloc(int r3, uint32_t size); // 80658418 PAL
 void RKNet::SOFree(int r3, void * buffer); // 80658498 PAL
