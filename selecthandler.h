@@ -40,7 +40,7 @@ class SELECTHandler {
   void decideBattleTypeAndTeams(); // 80661934 PAL
   void decideEngineClass(); // 80661a5c PAL
   void decideTrack(); // 80661ce8 PAL
-  void generateMySELECTId(); // 80661a14 PAL
+  void generateSELECTId(); // 80661a14 PAL
   uint8_t * getAidsBelongingToPlayerIds(); // 806604cc PAL
   BattleType getBattleType(); // 806604a8 PAL, see racedata.h for return type
   int getEngineClass(); // 8066048c PAL, not return type isn't same enum as racedata's
