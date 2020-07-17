@@ -44,7 +44,7 @@ class SELECTHandler {
   uint8_t * getAidsBelongingToPlayerIds(); // 806604cc PAL
   BattleType getBattleType(); // 806604a8 PAL, see racedata.h for return type
   int getEngineClass(); // 8066048c PAL, not return type isn't same enum as racedata's
-  int getMySELECTId(); // 80660470 PAL
+  int getSELECTId(); // 80660470 PAL
   int getPlayerCharacter(uint32_t aid, int playerAtConsole); // 806604d4 PAL, see http://wiki.tockdom.com/wiki/List_of_Identifiers#Characters
   SELECTPlayer * getPlayerSection(uint32_t aid, int playerAtConsole); // 806605c4 PAL
   int getPlayerStarRank(uint32_t aid, int playerAtConsole); // 8066060c PAL
