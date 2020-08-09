@@ -6,7 +6,7 @@ See also http://wiki.tockdom.com/wiki/MKWii_Network_Protocol/USER
 
 class USERHandler {
   void update(); // 806629c0 PAL
-  void prepare(); // 8066284c PAL, wipes all stored data and regenerate outgoing USER packet  
+  void prepare(); // 8066284c PAL, wipes all stored packets and regenerates outgoing packet  
   void createSendPacket(); // 8066300c PAL
   void importRecvPackets(); // 80662ebc PAL
 
