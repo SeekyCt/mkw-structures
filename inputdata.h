@@ -13,8 +13,9 @@ class InputState {
       0x8 = hop + drift
       0x20 = rear-view camera
     */
-  uint16_t buttonRaw; // bit flags:
+  uint16_t buttonRaw; // bit flags, vary slightly by controller
     /*
+    gcn:
       0x1 - d-pad left
       0x2 - d-pad right
       0x4 - d-pad down
