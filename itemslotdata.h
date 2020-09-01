@@ -31,6 +31,7 @@ public:
   void resetBlooperTimer(); // 807bb9d4 PAL
   void resetPowTimer(); // 807bb9e0 PAL
   void updateTimers(); // 807bb9ec PAL, also responsible for setting them to their initial values on the first frame
+  bool checkSpawnTimer(int objectId, int r5); // 807bb380 (from Star)
   // Always constructed inline
   
   // vtable 808d27b4 PAL
