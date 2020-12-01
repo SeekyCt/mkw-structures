@@ -1,24 +1,74 @@
 /*
 Raceinfo is a class that stores various information about the race and players, as well as handling some RNG
 A pointer to an instance of this class is stored at 0x809bd730 PAL
-Thanks to _tZ and Kevin for help with this
+Thanks to _tZ and Kevin for help with this, and Leseratte for the race finish time fields
 */
 
 class Random { // I'll move this at some point
   virtual ~Random; // 80555538 PAL
   Random(); // 80555464 PAL
-  int next(int limit); // 805555cc PAL
+  int next(); // 80555578 PAL
+  int nextLimited(int limit); // 805555cc PAL
   
   // vtable 808b42e0 PAL
   // 0x4-17 is unknown
 }; // Total size 0x18
+
+class GmDataAbstract {
+  // vtable
+  Raceinfo * raceinfo;
+}; // Total size 0x8
+
+class GmDataOnlineVsPlayer {
+  GmDataOnlineVsPlayer(); // 80532488 PAL
+  
+  Timer raceFinishTime;
+  // unknown 0xc-13
+}; // Total size 0x14
+
+class GmDataOnlineVs : public GmDataAbstract { // vtable override 808b3928 PAL
+  // unknown virtual function 1
+  virtual updateLocalPlayers(); // 8053fb98 PAL
+  // unknown virtual function 3
+  virtual handlePositionTracking(); // 8053f4a0 PAL
+  // unknown virtual functions 5-9
+  // constructor was inlined
+  
+  GmDataOnlineVsPlayer players[12];
+  RACEHEADER2 sendRH2; // 0x28 bytes
+  // unknown 0x120-173
+}; // Total size 0x174
+
+class Timer {
+  virtual ~Timer(); // 8051c334 PAL
+  Timer(); // 8051c374 PAL
+  
+  // vtable 808b2d44 PAL
+  uint16_t minutes;
+  uint8_t seconds;
+  // padding 0x7
+  uint16_t milliseconds;
+  // unknown 0xa-b
+}; // Total size 0xc
+
+class TimerManager {
+  virtual ~TimerManager(); // 805376e0 PAL
+  virtual reset(); // 80535864 PAL
+  virtual update(); // 80535904 PAL
+  // constructor was inlined
+  
+  // vtable 808b34b0 PAL
+  Timer timers[3];
+  Random random;
+  // unknown 0x40-4f
+}; // Total size 0x50
 
 class RaceinfoRandom : public Random {
   RaceinfoRandom(int param_2);
 }; // Total size 0x18
 
 class RaceinfoPlayer {
-  ~RaceinfoPlayer(); // 80532f48 PAL
+  virtual ~RaceinfoPlayer(); // 80532f48 PAL
   RaceinfoPlayer(uint8_t id, uint32_t param_3); // 80533ed8 PAL
   
   // vtable 808b34a4 PAL
@@ -48,8 +98,9 @@ class RaceinfoPlayer {
       2 is end of race camera
       1 is in race?
     */
-  void * unknown_0x3c;
-  // 0x40-47 unknown
+  Timer * lapFinishTimes; // array of 12 for... some reason
+  Timer * raceFinishTime;
+  // 0x44-47 unknown
   ControllerHolder * controllerHolder; // see inputdata.h
   // 0x4c-53 unknown
 }; // Total size 0x54
@@ -64,24 +115,15 @@ class Raceinfo {
   RaceinfoRandom random1;
   RaceinfoRandom random2;
   RaceinfoPlayer ** players; // pointer to an array of pointers, length is player count
-  void * gamemodeData; // different struct for each gamemode
-  void * unknown_0x14;
+  void * gamemodeData; // different class for each gamemode
+  TimerManager * timerManager;
   uint8_t * playerIdInEachPosition; // pointer to an array of player ids, 0 is the id in 1st, 1 is 2nd...
-  uint32_t unknown_0x1c;
+  // unknown 0x1c-1f
   uint32_t timer;
-  uint8_t unknown_0x24;
-  uint8_t unknown_0x25;
-  uint8_t unknown_0x26; // possibly padding
-  uint8_t unknown_0x27; // possibly padding
-  uint32_t unknown_0x28;
-  uint8_t unknown_0x2C;
-  uint8_t unknown_0x2D;
-  bool offlineRace;
+  // unknown 0x24-2d
+  bool canCountdownStart; // instantly true offline, needs syncing online
   bool cutSceneMode; // true for modes 11 & 12
   // unknown 0x30-3b
   KMGHolder * kmg;
-  // unknown 0x40-43
-  float unknown_0x44;
-  uint8_t unknown_0x45;
-  // unknown 0x49-4b
+  // unknown 0x40-4b
 }; // Total size 0x4c
