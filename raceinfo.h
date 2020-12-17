@@ -82,10 +82,9 @@ class RaceinfoPlayer {
   float nextCheckpointLapCompletion;
   float nextCheckpointLapCompletionMax;
   uint8_t position;
-  // unknown 0x21-24
+  // unknown 0x21-23
   uint8_t currentLap;
   uint8_t maxLap;
-  uint8_t currentLap;
   uint8_t currentKCP;
   uint8_t maxKCP;
   // unknown 0x29-37
