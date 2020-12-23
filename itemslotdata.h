@@ -4,23 +4,12 @@ A pointer to an instance of this class is stored at 0x809c3670 PAL
 See also http://wiki.tockdom.com/wiki/Filesystem/Race/Common.szs/ItemSlot.bin
 */
 
-class PlayerHolderSub { // This'll get moved once I figure out what it is properly or write up PlayerHolder info
-public: 
-  virtual ~PlayerHolderSub(); // 8021a144 PAL
-  PlayerHolderSub(); // 8021a0f0 PAL
-  
-  // vtable 802a2b48 PAL
-  void * unknown_0x4;
-  void * unknown_0x8;
-  void * unknown_0xC;
-}; // Total size 0x10
-
 typedef struct {
   uint32_t columns;
   short * data;
 } ItemSlotTableHolder; // Total size 0x8
 
-class ItemSlotData : public PlayerHolderSub {
+class ItemSlotData {
 public:
   virtual ~ItemSlotData(); // 807ba650 PAL
   int decideItem(int itemboxSetting, int position, int r6, int r7, void * r8); // 807bb42c PAL
@@ -35,6 +24,7 @@ public:
   // Always constructed inline
   
   // vtable 808d27b4 PAL
+  // unknown 0x4-f
   ItemSlotTableHolder playerChances;
   ItemSlotTableHolder cpuChances;
   ItemSlotTableHolder specialChances;
