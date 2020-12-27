@@ -8,7 +8,7 @@ typedef enum : int {
   SELECT_PUBLIC_VS = 1,
   SELECT_PUBLIC_BATTLE = 2,
   SELECT_FRIEND_VS = 3,
-  SELECT_FRIEND_BATTLe = 4
+  SELECT_FRIEND_BATTLE = 4
 } SELECTRoomType;
 
 typedef struct {
