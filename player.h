@@ -62,6 +62,7 @@ public:
   int16_t shockTimer; // 0x18C, used when shocked by KC Zappers, TC, or Shock
   int16_t BlooperCharacterInk; // 0x18E, timer for ink on player
   u_int8_t field_0x190; // set to 1 when the blooper state is applied
+  // unknown 0x191
   int16_t crushTimer; // 0x192, timer for being crushed by Thwomp & Mega
   int16_t MegaTimer; // 0x194, timer for Mega mushroom
   uint32_t drivingDirection; // 0: forwards, 1: braking, 2: waiting on the backwards counter, 3: backwards
