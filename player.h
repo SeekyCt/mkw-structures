@@ -80,8 +80,9 @@ public:
   updateMtCharge(); // 80588888 PAL
 
   // vtable 80587b30 PAL
-  // unknown 0x294 - 0x2c3
+  // unknown 0x294 - 0x2ab
   u_int8_t field_0x2AC; // could be a wheelie flag (0 = not in wheelie, 1 = in wheelie), set to 1 when starting wheelie and 0 when ending wheelie?
+  // unknown 0x2ad - 0x2c3
 }; // Total size 0x2c4
 
 class PlayerSub {
