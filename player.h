@@ -38,14 +38,14 @@ public:
   // unknown 0xc8 - 0xf3
   float divingRotation;
   // unknown float 0xf8
-  uint16_t driftState; // 1: charging mt, 2: mt charged
-  uint16_t mtCharge;
+  int16_t driftState; // 1: charging mt, 2: mt charged
+  int16_t mtCharge;
   // unknown 0x100 - 0x10b
-  uint16_t mtBoost;
+  int16_t mtBoost;
   // unknown uint16_t 0x10e
-  uint16_t mushroomBoost;
+  int16_t mushroomBoost;
   // unknown uint16_t 0x112
-  uint16_t trickBoost;
+  int16_t trickBoost;
   // unknown uint16_t 0x116, 0x118
   // unknown 0x11a - 0x11b
   // unknown float 0x11c
@@ -56,7 +56,16 @@ public:
   // unknown 0x160 - 0x163
   VEC3 scale;
   // unknown floats 0x170, 0x174, 0x178
-  // unknown 0x17c - 0x247
+  // unknown 0x17c - 0x187
+  int16_t mushroomBoost2; // 0x188, another mushroom boost timer
+  int16_t starTimer; // 0x18A, timer for Star
+  int16_t shockTimer; // 0x18C, used when shocked by KC Zappers, TC, or Shock
+  int16_t blooperCharacterInk; // 0x18E, timer for ink on player
+  u_int8_t field_0x190; // set to 1 when the blooper state is applied
+  // unknown 0x191
+  int16_t crushTimer; // 0x192, timer for being crushed by Thwomp & Mega
+  int16_t MegaTimer; // 0x194, timer for Mega mushroom
+  // unknown 0x196 - 0x248
   uint32_t drivingDirection; // 0: forwards, 1: braking, 2: waiting on the backwards counter, 3: backwards
   uint16_t backwardsAllowCounter;
   // unknown 0x24e - 0x287
@@ -72,6 +81,7 @@ public:
 
   // vtable 80587b30 PAL
   // unknown 0x294 - 0x2c3
+  u_int8_t field_0x2AC; // could be a wheelie flag (0 = not in wheelie, 1 = in wheelie), set to 1 when starting wheelie and 0 when ending wheelie?
 }; // Total size 0x2c4
 
 class PlayerSub {
