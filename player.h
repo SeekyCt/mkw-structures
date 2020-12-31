@@ -60,7 +60,7 @@ public:
   int16_t mushroomBoost2; // 0x188, another mushroom boost timer
   int16_t starTimer; // 0x18A, timer for Star
   int16_t shockTimer; // 0x18C, used when shocked by KC Zappers, TC, or Shock
-  int16_t BlooperCharacterInk; // 0x18E, timer for ink on player
+  int16_t blooperCharacterInk; // 0x18E, timer for ink on player
   u_int8_t field_0x190; // set to 1 when the blooper state is applied
   // unknown 0x191
   int16_t crushTimer; // 0x192, timer for being crushed by Thwomp & Mega
