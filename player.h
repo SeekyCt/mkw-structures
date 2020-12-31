@@ -56,7 +56,7 @@ public:
   // unknown 0x160 - 0x163
   VEC3 scale;
   // unknown floats 0x170, 0x174, 0x178
-  // unknown 0x17c - 0x247
+  // unknown 0x17c - 0x187
   int16_t MushroomBoost2; // 0x188, another mushroom boost timer
   int16_t starTimer; // 0x18A, timer for Star
   int16_t shockTimer; // 0x18C, used when shocked by KC Zappers, TC, or Shock
@@ -65,6 +65,7 @@ public:
   // unknown 0x191
   int16_t crushTimer; // 0x192, timer for being crushed by Thwomp & Mega
   int16_t MegaTimer; // 0x194, timer for Mega mushroom
+  // unknown 0x196 - 0x248
   uint32_t drivingDirection; // 0: forwards, 1: braking, 2: waiting on the backwards counter, 3: backwards
   uint16_t backwardsAllowCounter;
   // unknown 0x24e - 0x287
