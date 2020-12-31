@@ -57,7 +57,7 @@ public:
   VEC3 scale;
   // unknown floats 0x170, 0x174, 0x178
   // unknown 0x17c - 0x187
-  int16_t MushroomBoost2; // 0x188, another mushroom boost timer
+  int16_t mushroomBoost2; // 0x188, another mushroom boost timer
   int16_t starTimer; // 0x18A, timer for Star
   int16_t shockTimer; // 0x18C, used when shocked by KC Zappers, TC, or Shock
   int16_t BlooperCharacterInk; // 0x18E, timer for ink on player
