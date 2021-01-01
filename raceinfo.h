@@ -78,16 +78,20 @@ class RaceinfoPlayer {
   uint16_t checkpoint;
   float raceCompletion; // fraction of way through a lap (ex. 1.0 is the start of lap 1, 2.5 is half way through lap 2)
   float raceCompletionMax;
-  float unknown_0x14;
+  float firstKcpLapCompletion;
   float nextCheckpointLapCompletion;
   float nextCheckpointLapCompletionMax;
   uint8_t position;
-  // unknown 0x21-23
-  uint8_t currentLap;
+  uint8_t respawn;
+  // unknown 0x22-23
+  uint16_t currentLap;
   uint8_t maxLap;
   uint8_t currentKCP;
   uint8_t maxKCP;
-  // unknown 0x29-37
+  // unknown 0x29-2b
+  uint32_t frameCounter;
+  uint32_t framesInFirst;
+  // unknow 0x34-37
   uint32_t stateFlags; // bit flags:
     /*
       64 is coming last animation?

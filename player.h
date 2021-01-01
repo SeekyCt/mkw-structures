@@ -6,11 +6,12 @@ A pointer to an instance of this class is stored at 0x809c18f8 PAL
 class PlayerSub10 {
 public:
   PlayerSub10(); // 80577fc4 PAL
-  init(bool unk0, bool unk1); // 805784d4 PAL
+  init(bool unk0, bool unk1); // 805784d4 PAL  
   setInitialPhysicsValues(VEC3 *position, VEC3 *angles); // 80584044 PAL
   updateAccelerationAndSpeed(); // 8057b9bc PAL
   updateDiving(); // 805869dc PAL
   updateTurn(); // 8057a8b4 PAL
+  updatePlayerSpeed(); // 8057ab68 PAL
 
   PlayerPointers *playerPointers;
   // unknown pointers 0x4, 0x8
@@ -40,20 +41,27 @@ public:
   // unknown float 0xf8
   int16_t driftState; // 1: charging mt, 2: mt charged
   int16_t mtCharge;
-  // unknown 0x100 - 0x10b
+  int16_t mtCharge2; // second one used by karts
   int16_t mtBoost;
+  // unknown 0x104 - 0x10b
+  int16_t allMTBoost; // also includes the boost from a SSMT
   // unknown uint16_t 0x10e
   int16_t mushroomBoost;
   // unknown uint16_t 0x112
   int16_t trickBoost;
-  // unknown uint16_t 0x116, 0x118
+  // unknown uint16_t 0x116
+  uint16_t boostType; 
   // unknown 0x11a - 0x11b
-  // unknown float 0x11c
+  float boostMultiplier; // this gets multiplied with nextspeed which will be the next speed
   float boostAcceleration;
-  // unknown 0x124 - 0x157
+  // unknown 0x124 - 0x147
+  uint16_t zipperBoost; // boost that's mostly used on ramps
+  // unk uint16_t 0x14a
+  uint16_t ssmtCharge;
+  // unknown 0x14e - 0x157
   float realTurn;
   float weightedTurn;
-  // unknown 0x160 - 0x163
+  // float playerSize perhaps?
   VEC3 scale;
   // unknown floats 0x170, 0x174, 0x178
   // unknown 0x17c - 0x187
@@ -61,11 +69,13 @@ public:
   int16_t starTimer; // 0x18A, timer for Star
   int16_t shockTimer; // 0x18C, used when shocked by KC Zappers, TC, or Shock
   int16_t blooperCharacterInk; // 0x18E, timer for ink on player
-  u_int8_t field_0x190; // set to 1 when the blooper state is applied
+  uint8_t field_0x190; // set to 1 when the blooper state is applied
   // unknown 0x191
   int16_t crushTimer; // 0x192, timer for being crushed by Thwomp & Mega
   int16_t MegaTimer; // 0x194, timer for Mega mushroom
-  // unknown 0x196 - 0x248
+  // unknown 0x196 - 0x1C3
+  uint16_t zipperBoost2;
+  // unknown 0x1C6 - 0x248
   uint32_t drivingDirection; // 0: forwards, 1: braking, 2: waiting on the backwards counter, 3: backwards
   uint16_t backwardsAllowCounter;
   // unknown 0x24e - 0x287
@@ -77,12 +87,17 @@ class PlayerSub10Bike {
 public:
   PlayerSub10Bike(); // 808b5ee8 PAL
   updateRotationVector(); // 80587d68 PAL
+  updateWheelie(); // 80587d64 PAL
   updateMtCharge(); // 80588888 PAL
 
   // vtable 80587b30 PAL
-  // unknown 0x294 - 0x2ab
-  u_int8_t field_0x2AC; // could be a wheelie flag (0 = not in wheelie, 1 = in wheelie), set to 1 when starting wheelie and 0 when ending wheelie?
-  // unknown 0x2ad - 0x2c3
+  // unknown 0x294 - 0x2a7
+  uint32_t wheelieTimer;
+  uint8_t field_0x2AC; // could be a wheelie flag (0 = not in wheelie, 1 = in wheelie), set to 1 when starting wheelie and 0 when ending wheelie?
+  // unknown 0x2ad - 0x2B3
+  uint16_t wheelietimer2; // from what i know the same as wheelieTimer, but stored as a ushort
+  uint16_t wheelieCooldown;
+  // unknown 0x2b8 - 0x2c3
 }; // Total size 0x2c4
 
 class PlayerSub {
