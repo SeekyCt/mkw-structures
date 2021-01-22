@@ -1,10 +1,17 @@
 /*
 Racedata is the class that holds the information to set up a race, such as the gamemode and the characters each player chose
-A pointer to an instance of this class is stored at 0x809bd728 PAL
-TheLordScruffy helped massively with this, WhatIsLoaf found the ghost player type
+
+Contributors:
+    Seeky (main documentation)
+    TheLordScruffy (main documentation)
+    WhatIsLoaf (ghost player type)
+    riidefi (ParameterFile - no longer public)
+References:
+    http://wiki.tockdom.com/wiki/Mission_Mode#mission_single.kmt
+    https://github.com/riidefi/MKWDecompilation/blob/master/Static/System/ParameterFile.hpp
 */
 
-typedef enum : int {
+typedef enum : int32_t {
     PLAYER_REAL_LOCAL,
     PLAYER_CPU,
     PLAYER_UNKNOWN2,
@@ -13,24 +20,24 @@ typedef enum : int {
     PLAYER_NONE
 } PlayerType;
 
-typedef enum : int {
+typedef enum : int32_t {
     TEAM_RED,
     TEAM_BLUE
 } Team;
 
-typedef enum : int {
+typedef enum : int32_t {
     BATTLE_BALLOON,
     BATTLE_COIN
 } BattleType;
 
-typedef enum : int {
+typedef enum : int32_t {
     CPU_EASY,
     CPU_NORMAL,
     CPU_HARD,
     CPU_NONE
 } CpuMode;
 
-typedef enum : int {
+typedef enum : int32_t {
     MODE_GRAND_PRIX,
     MODE_VS_RACE,
     MODE_TIME_TRIAL,
@@ -46,14 +53,14 @@ typedef enum : int {
     MODE_CREDITS
 } GameMode;
 
-typedef enum : int {
+typedef enum : int32_t {
     CC_50,
     CC_100,
     CC_150,
     CC_BATTLE // Note: Battle mode actually sets it to 50cc (which is ignored by code), but setting it to this in other modes results in Battle CC
 } EngineClass;
 
-typedef enum : int {
+typedef enum : int32_t {
     ITEMS_BALANCED,
     ITEMS_FRANTIC,
     ITEMS_STRATEGIC,
@@ -61,33 +68,34 @@ typedef enum : int {
 } ItemMode;
 
 typedef struct {
-  uint32_t courseId; // http://wiki.tockdom.com/wiki/List_of_Identifiers#Courses
-  EngineClass engineClass;
-  GameMode gamemode;
-  uint32_t unknown_0xC;
-  BattleType battleType;
-  CpuMode cpuMode;
-  ItemMode itemMode;
-  uint8_t hudPlayerIds[4];
-  uint32_t cupId; // http://wiki.tockdom.com/wiki/List_of_Identifiers#Cups
-  uint8_t raceNumber; // resets at 100 for some reason
-  uint8_t lapCount;
-  uint8_t unknown_0x26;
-  uint8_t unknown_0x27;
-  uint32_t modeFlags; // bit flags:
+    uint32_t courseId; // http://wiki.tockdom.com/wiki/List_of_Identifiers#Courses
+    EngineClass engineClass;
+    GameMode gamemode;
+    uint32_t unknown_0xC;
+    BattleType battleType;
+    CpuMode cpuMode;
+    ItemMode itemMode;
+    uint8_t hudPlayerIds[4];
+    uint32_t cupId; // http://wiki.tockdom.com/wiki/List_of_Identifiers#Cups
+    uint8_t raceNumber; // resets at 100 for some reason
+    uint8_t lapCount;
+    uint8_t unknown_0x26;
+    uint8_t unknown_0x27;
+    uint32_t modeFlags; // bit flags:
     /*
-      2 is teams enabled
-      1 is mirror mode
+        2 is teams enabled
+        1 is mirror mode
+        Others unknown
     */
-  uint32_t unknown_0x2c;
-  uint32_t unknown_0x30;
+    uint32_t unknown_0x2c;
+    uint32_t unknown_0x30;
 } RacedataSettings; // Total size 0x34
 
 class RacedataPlayer {
-    virtual ~RacedataPlayer(); // 8052DC68 PAL
-    RacedataPlayer(); // 8052d96c PAL
+    virtual ~RacedataPlayer(); // 8052DC68
+    RacedataPlayer(); // 8052d96c
     
-    // vtable 808b3294 PAL
+    // vtable 808b3294
     uint8_t unknown_0x4;
     int8_t localPlayerNum;
     int8_t realControllerId; // id of the controller at the console for this player, -1 if not controlled by one
@@ -108,35 +116,38 @@ class RacedataPlayer {
 }; // Total size 0xf0
 
 class RacedataScenario {
-  virtual ~RacedataScenario();
-  RacedataScenario(RKGFile * ghost); // 8052dbc8 PAL, never used afaik (Racedata's constructor does it inline)
+    virtual ~RacedataScenario();
+    RacedataScenario(RKGFile * ghost); // 8052dbc8, never used - racedata's constructor does it inline
 
-  // vtable 808b3288 PAL
-  uint8_t playerCount;
-  // unknown 0x5-7, 6 & 7 might be padding but 5 is set to 0 in constructor
-  RacedataPlayer players[12];
-  RacedataSettings settings;
-  KMTFile mission; // http://wiki.tockdom.com/wiki/Mission_Mode#mission_single.kmt - size is 0x70
-  RKGFile * ghost; // Scenario 0 points to the one you race, 1 points to one I'm not sure about, 2 points to null
+    // vtable 808b3288
+    uint8_t playerCount;
+    // unknown 0x5-7, 6 & 7 might be padding but 5 is set to 0 in constructor
+    RacedataPlayer players[12];
+    RacedataSettings settings;
+    KMTFile mission; // 0x70 struct, see http://wiki.tockdom.com/wiki/Mission_Mode#mission_single.kmt
+    RKGFile * ghost; // Scenario 0 points to the one you race, 1 points to one I'm not sure about, 2 points to null
 }; // Total size 0xbf0
 
 class RacedataMain {
   // Always constructed inline, functions seem to always be members of Racedata rather than specifically RacedataMain
 
-  //vtable 808b3260 PAL (empty)  
+  //vtable 808b3260 (empty)  
   RacedataScenario scenarios[3]; // 0 is in race, 1 is in menu, not sure what 2 is
   RKGFile ghosts[2]; // 0x2800 size each, 0 is the one you're racing, not sure what 1 is, see http://wiki.tockdom.com/wiki/RKG_(File_Format)
 }; // Total size 0x73d4
 
-class Racedata : public ParameterFile { // https://github.com/riidefi/MKWDecompilation/blob/master/Static/System/ParameterFile.hpp with /boot/menuset.prm parameter file
-public:
-  virtual ~Racedata(); // 80530038 PAL
-  virtual FUN_80009ddc();
-  virtual FUN_80532078(); // just a blr
-  virtual FUN_80532074(); // just a blr
-  virtual FUN_80532070(); // just a blr
-  // Always constructed inline
+// ParameterFile size is 0x1c, Racedata's is /boot/menuset.prm
+class Racedata : ParameterFile { // vtable override 808b3268
+    static Racedata * sInstance; // 0x809bd728
+    static Racedata * getStaticInstance(); // 8052fe58
+    static void destroyStaticInstance(); // 8052ffe8
+
+    virtual ~Racedata(); // 80530038
+    virtual FUN_80009ddc();
+    virtual FUN_80532078(); // just a blr
+    virtual FUN_80532074(); // just a blr
+    virtual FUN_80532070(); // just a blr
+    // Always constructed inline
   
-  // vtable 808b3268 PAL
-  RacedataMain main; // 0x1c bytes in
+    RacedataMain main;
 }; // Total size 0x73f0

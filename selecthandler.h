@@ -1,10 +1,13 @@
 /*
 SELECTHandler is the class that handles the creation and processing of SELECT packets.
-A pointer to an instance of this class is stored at 0x809c2100 PAL
-See also http://wiki.tockdom.com/wiki/MKWii_Network_Protocol/SELECT
+
+Contributors:
+  Seeky (main documentation)
+References:
+  http://wiki.tockdom.com/wiki/MKWii_Network_Protocol/SELECT
 */
 
-typedef enum : int {
+typedef enum : int32_t {
   SELECT_PUBLIC_VS = 1,
   SELECT_PUBLIC_BATTLE = 2,
   SELECT_FRIEND_VS = 3,
@@ -34,35 +37,39 @@ typedef struct {
 } SELECTPacket; // Total size 0x38
 
 class SELECTHandler {
-  SELECTHandler(SELECTRoomType roomType); // 8066076c PAL
-  ~SELECTHandler(); // 806607f4 PAL
-  void allocatePlayerIdsToAids(); // 80662034 PAL
-  void decideBattleTypeAndTeams(); // 80661934 PAL
-  void decideEngineClass(); // 80661a5c PAL
-  void decideTrack(); // 80661ce8 PAL
-  void generateSELECTId(); // 80661a14 PAL
-  uint8_t * getAidsBelongingToPlayerIds(); // 806604cc PAL
-  BattleType getBattleType(); // 806604a8 PAL, see racedata.h for return type
-  int getEngineClass(); // 8066048c PAL, not return type isn't same enum as racedata's
-  int getSELECTId(); // 80660470 PAL
-  int getPlayerCharacter(uint32_t aid, int playerAtConsole); // 806604d4 PAL, see http://wiki.tockdom.com/wiki/List_of_Identifiers#Characters
-  SELECTPlayer * getPlayerSection(uint32_t aid, int playerAtConsole); // 806605c4 PAL
-  int getPlayerStarRank(uint32_t aid, int playerAtConsole); // 8066060c PAL
-  int getPlayerTeam(uint32_t aid, int playerAtConsole); // 80660654 PAL
-  int getPlayerVehicle(uint32_t aid, int playerAtConsole); // 80660524 PAL, see http://wiki.tockdom.com/wiki/List_of_Identifiers#Vehicles
-  int getPlayerVote(uint32_t aid, int playerAtConsole); // 80660574 PAL, see http://wiki.tockdom.com/wiki/List_of_Identifiers#Courses
-  int getWinningTrack(); // 80660450 PAL, see http://wiki.tockdom.com/wiki/List_of_Identifiers#Courses
-  int getWinningVoter(); // 80660434 PAL
-  void importNewRecvPackets(); // 80661078 PAL
-  void initialiseBuffers(); // 8065ffa4 PAL
-  void initialiseRecvBuffers(); // 80660a00 PAL
-  void initialiseRecvBuffer(); // 80660a00 PAL
-  void initialsePacketSELECTPlayers(SELECTPlayer * players); // 80660bd0 PAL
-  void initialiseSendBuffer(); // 806608b4 PAL
-  void prepareSendPacket(uint32_t aid, uint64_t sendTime); // 80661288 PAL
-  void prepareSendUSERAndSELECTPackets(); // 80660f1c PAL
-  void processNewRecvVotes(); // 806614b0 PAL
-  void setSendPacketPlayerDetails(int character, int vehicle, int trackVote, int playerAtConsole, int starRank); // 80660750 PAL
+  static SELECTHandler * sInstance; // 809c2100
+  static SELECTHandler * getStaticInstance(); // 8065fe8c
+  static void destroyStaticInstance(); // 8065ff60
+
+  SELECTHandler(SELECTRoomType roomType); // 8066076c
+  ~SELECTHandler(); // 806607f4
+  void allocatePlayerIdsToAids(); // 80662034
+  void decideBattleTypeAndTeams(); // 80661934
+  void decideEngineClass(); // 80661a5c
+  void decideTrack(); // 80661ce8
+  void generateSELECTId(); // 80661a14
+  uint8_t * getAidsBelongingToPlayerIds(); // 806604cc
+  BattleType getBattleType(); // 806604a8, see racedata.h for return type
+  int32_t getEngineClass(); // 8066048c, not return type isn't same enum as racedata's
+  int32_t getSELECTId(); // 80660470
+  int32_t getPlayerCharacter(uint32_t aid, int32_t playerAtConsole); // 806604d4, see http://wiki.tockdom.com/wiki/List_of_Identifiers#Characters
+  SELECTPlayer * getPlayerSection(uint32_t aid, int32_t playerAtConsole); // 806605c4
+  int32_t getPlayerStarRank(uint32_t aid, int32_t playerAtConsole); // 8066060c
+  int32_t getPlayerTeam(uint32_t aid, int32_t playerAtConsole); // 80660654
+  int32_t getPlayerVehicle(uint32_t aid, int32_t playerAtConsole); // 80660524, see http://wiki.tockdom.com/wiki/List_of_Identifiers#Vehicles
+  int32_t getPlayerVote(uint32_t aid, int32_t playerAtConsole); // 80660574, see http://wiki.tockdom.com/wiki/List_of_Identifiers#Courses
+  int32_t getWinningTrack(); // 80660450, see http://wiki.tockdom.com/wiki/List_of_Identifiers#Courses
+  int32_t getWinningVoter(); // 80660434
+  void importNewRecvPackets(); // 80661078
+  void initialiseBuffers(); // 8065ffa4
+  void initialiseRecvBuffers(); // 80660a00
+  void initialiseRecvBuffer(); // 80660a00
+  void initialsePacketSELECTPlayers(SELECTPlayer * players); // 80660bd0
+  void initialiseSendBuffer(); // 806608b4
+  void prepareSendPacket(uint32_t aid, uint64_t sendTime); // 80661288
+  void prepareSendUSERAndSELECTPackets(); // 80660f1c
+  void processNewRecvVotes(); // 806614b0
+  void setSendPacketPlayerDetails(int32_t character, int32_t vehicle, int32_t trackVote, int32_t playerAtConsole, int32_t starRank); // 80660750
 
   SELECTRoomType roomType;
   // unknown 0x4-7
@@ -72,7 +79,10 @@ class SELECTHandler {
   // unknown 0x2e1-2e7
   uint64_t lastSendTime;
   uint64_t lastRecvTimes[12];
-  // unknown 0x350-3e7
+  uint64_t delaysFromPredictedRecvTimes[12]; // unsure
+  int32_t onTimeRecvCounts[12]; // unsure
+  uint32_t aidsWithNewSELECT; // bit flag, 1 for aids unprocessed SELECT packets are received from, index 1 << aid
+  uint32_t aidsWithNewRH1; // same but for RACEHEADER1
   uint32_t aidsWithAccurateRaceSettings; // bit flag, 1 for aids agreed with about the settings of the room, index 1 << aid
   uint32_t aidsWithAccurateAidPidMap; // same but for the aid player id map
   uint32_t aidsThatHaveVoted; // same but for the aids that have picked a track
