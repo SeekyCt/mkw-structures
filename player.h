@@ -40,8 +40,8 @@ public:
   float baseSpeed;
   float softSpeedLimit;
   // unknown float 0x1c, maybe another speed limit
-  float nextSpeed;
-  float speed;
+  float currentSpeed;
+  float lastSpeed;
   // unknown float 0x28, maybe last speed
   float hardSpeedLimit;
   float acceleration;
