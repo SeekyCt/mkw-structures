@@ -119,6 +119,58 @@ public:
   // unknown 0x2b8 - 0x2c3
 }; // Total size 0x2c4
 
+class PlayerSub1c {
+public:
+  PlayerSub1c(PlayerParams *playerParams); // 805943b4
+  updateFromInput(); // 8059487c
+  computeStartBoost(); // 805959d4
+  applyStartBoost(int startBoostIdx); // 80595af8
+
+  // vtable 808b6534
+  uint32_t bitfield0; // bit flags:
+    /*
+       0 accelerate
+       1 drift (manual)
+       2 hop
+       3 brake
+       7 first frame of hop
+       8 first frame of acceleration
+      13 stick left
+      18 ground
+      20 boost
+      24 stick right
+      28 drift (auto)
+      29 wheelie
+    */
+  uint32_t bitfield1; // bit flags:
+    /*
+      20 mt boost
+    */
+  uint32_t bitfield2;
+  uint32_t bitfield3; // bit flags:
+    /*
+       8 start boost charge
+    */
+  uint32_t bitfield4; // bit flags:
+    /*
+       0 cpu-controlled
+       1 real local
+       4 automatic drift
+       6 ghost
+    */
+  // unknown pointer 0x18, contains a pointer to PlayerPointers
+  uint32_t airtime;
+  // unknown 0x20 - 0x27
+  // unknown VEC3 0x28, 0x34
+  // unknown 0x40 - 0x87
+  float stickX;
+  float stickY;
+  // unknown 0x90 - 0x9b
+  float startBoostCharge;
+  int startBoostIdx; // -1 when burning out
+  // unknown 0xa4 - 0xbf
+}; // Total size 0xc0
+
 class PlayerSub {
 public:
   PlayerSub(PlayerParams *playerParams); // 80595d48
