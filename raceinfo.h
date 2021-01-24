@@ -6,6 +6,7 @@ Contributors:
   _tZ (RaceinfoPlayer attributes)
   Kevin (various attributes)
   Leseratte (race finish time attributes)
+  stebler (intro timer attribute)
 */
 
 class GmDataAbstract {
