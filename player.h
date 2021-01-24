@@ -204,16 +204,18 @@ public:
   float rotationSpeed;
   VEC3 position;
   VEC3 gravitySpeed; // speed caused by gravity and normal force
-  // unknown VEC3 0x80, 0x8c, 0x98, 0xa4
+  // unknown VEC3 0x80, 0x8c, 0x98
+  VEC3 rotVec0; // contains drift, diving and wheel rotation
   VEC3 speed2;
-  // unknown VEC3 0xbc
+  VEC3 rotVec1;
   VEC3 speed3;
   VEC3 speed; // sum of gravitySpeed, engineSpeed, speed2 and speed3
   float speedNorm;
-  VEC3 driftDiveVec; // vector used to compute the orientation of the player
+  VEC3 rotVec2;
   VEC4 rotation0; // as a quaternion
   VEC4 rotation1; // this is probably the next or the previous rotation
-  // unknown VEC3 0x110, 0x11c
+  // unknown VEC3 0x110
+  VEC3 wheelRotVec;
   // unknown VEC4 0x128, 0x138
   float gravity; // 1.3f most of the time
   VEC3 engineSpeed; // speed caused by the vehicle engine
