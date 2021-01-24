@@ -18,7 +18,7 @@ class USERHandler {
     void update(); // 806629c0
     void exportSendPacket(uint32_t aid); // 80662abc, copies the outgoing packet for the specified aid into RKNetController's split send buffers
     void handlePlayerDisconnect(uint32_t aid); // 80662b00, clears flags about them and split sending & receiving buffers in RKNetController  
-    void readSaveVr(); // 80662d80, reads battle rating from save data into send packet
+    void readSaveVr(); // 80662d80, reads versus rating from save data into send packet
     void readSaveBr(); // 80662dc4, reads battle rating from save data into send packet
     void importRecvPackets(); // 80662ebc
     void createSendPacket(); // 8066300c
