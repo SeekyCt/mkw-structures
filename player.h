@@ -31,6 +31,7 @@ public:
   updateDiving(); // 805869dc
   updateTurn(); // 8057a8b4
   updatePlayerSpeed(); // 8057ab68
+  applyStartBoost(int frames); // 8058212c
 
   PlayerPointers *playerPointers;
   // unknown pointers 0x4, 0x8
@@ -39,8 +40,8 @@ public:
   float baseSpeed;
   float softSpeedLimit;
   // unknown float 0x1c, maybe another speed limit
-  float nextSpeed;
-  float speed;
+  float currentSpeed;
+  float lastSpeed;
   // unknown float 0x28, maybe last speed
   float hardSpeedLimit;
   float acceleration;
@@ -63,7 +64,7 @@ public:
   int16_t mtCharge2; // second one used by karts
   int16_t mtBoost;
   // unknown 0x104 - 0x10b
-  int16_t allMTBoost; // also includes the boost from a SSMT
+  int16_t allMTBoost; // also includes the boost from a SSMT and the start boost
   // unknown uint16_t 0x10e
   int16_t mushroomBoost;
   // unknown uint16_t 0x112
@@ -119,6 +120,58 @@ public:
   // unknown 0x2b8 - 0x2c3
 }; // Total size 0x2c4
 
+class PlayerSub1c {
+public:
+  PlayerSub1c(PlayerParams *playerParams); // 805943b4
+  updateFromInput(); // 8059487c
+  computeStartBoost(); // 805959d4
+  applyStartBoost(int startBoostIdx); // 80595af8
+
+  // vtable 808b6534
+  uint32_t bitfield0; // bit flags:
+    /*
+       0 accelerate
+       1 drift (manual)
+       2 hop
+       3 brake
+       7 first frame of hop
+       8 first frame of acceleration
+      13 stick left
+      18 ground
+      20 boost
+      24 stick right
+      28 drift (auto)
+      29 wheelie
+    */
+  uint32_t bitfield1; // bit flags:
+    /*
+      20 mt boost
+    */
+  uint32_t bitfield2;
+  uint32_t bitfield3; // bit flags:
+    /*
+       8 start boost charge
+    */
+  uint32_t bitfield4; // bit flags:
+    /*
+       0 cpu-controlled
+       1 real local
+       4 automatic drift
+       6 ghost
+    */
+  // unknown pointer 0x18, contains a pointer to PlayerPointers
+  uint32_t airtime;
+  // unknown 0x20 - 0x27
+  // unknown VEC3 0x28, 0x34
+  // unknown 0x40 - 0x87
+  float stickX;
+  float stickY;
+  // unknown 0x90 - 0x9b
+  float startBoostCharge;
+  int startBoostIdx; // -1 when burning out
+  // unknown 0xa4 - 0xbf
+}; // Total size 0xc0
+
 class PlayerSub {
 public:
   PlayerSub(PlayerParams *playerParams); // 80595d48
@@ -151,16 +204,18 @@ public:
   float rotationSpeed;
   VEC3 position;
   VEC3 gravitySpeed; // speed caused by gravity and normal force
-  // unknown VEC3 0x80, 0x8c, 0x98, 0xa4
+  // unknown VEC3 0x80, 0x8c, 0x98
+  VEC3 rotVec0; // contains drift, diving and wheel rotation
   VEC3 speed2;
-  // unknown VEC3 0xbc
+  VEC3 rotVec1;
   VEC3 speed3;
   VEC3 speed; // sum of gravitySpeed, engineSpeed, speed2 and speed3
   float speedNorm;
-  VEC3 driftDiveVec; // vector used to compute the orientation of the player
+  VEC3 rotVec2;
   VEC4 rotation0; // as a quaternion
   VEC4 rotation1; // this is probably the next or the previous rotation
-  // unknown VEC3 0x110, 0x11c
+  // unknown VEC3 0x110
+  VEC3 wheelRotVec;
   // unknown VEC4 0x128, 0x138
   float gravity; // 1.3f most of the time
   VEC3 engineSpeed; // speed caused by the vehicle engine

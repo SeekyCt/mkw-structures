@@ -119,7 +119,8 @@ class Raceinfo {
   void * gamemodeData; // different class for each gamemode
   TimerManager * timerManager;
   uint8_t * playerIdInEachPosition; // pointer to an array of player ids, 0 is the id in 1st, 1 is 2nd...
-  // unknown 0x1c-1f
+  // unknown 0x1c-1d
+  int16_t introTimer;
   uint32_t timer;
   // unknown 0x24-2d
   bool canCountdownStart; // instantly true offline, needs syncing online
