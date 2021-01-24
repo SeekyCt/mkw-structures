@@ -31,6 +31,7 @@ public:
   updateDiving(); // 805869dc
   updateTurn(); // 8057a8b4
   updatePlayerSpeed(); // 8057ab68
+  applyStartBoost(int frames); // 8058212c
 
   PlayerPointers *playerPointers;
   // unknown pointers 0x4, 0x8
@@ -63,7 +64,7 @@ public:
   int16_t mtCharge2; // second one used by karts
   int16_t mtBoost;
   // unknown 0x104 - 0x10b
-  int16_t allMTBoost; // also includes the boost from a SSMT
+  int16_t allMTBoost; // also includes the boost from a SSMT and the start boost
   // unknown uint16_t 0x10e
   int16_t mushroomBoost;
   // unknown uint16_t 0x112
