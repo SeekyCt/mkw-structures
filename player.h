@@ -1,26 +1,47 @@
 /*
 PlayerHolder contains most player-specific data during a race
-A pointer to an instance of this class is stored at 0x809c18f8 PAL
+
+Contributors:
+  stebler (main documentation)
+  SwareJonge (extra methods and attributes)
+  1superchip (extra timer attributes, correcting some signing of types)
+References:
+  http://wiki.tockdom.com/wiki/BSP_(File_Format)
+  http://wiki.tockdom.com/wiki/KartParam.bin
+  http://wiki.tockdom.com/wiki/KartPartsDispParam.bin
+  http://wiki.tockdom.com/wiki/BikePartsDispParam.bin
 */
+
+typedef struct {
+  float x, y, z;
+} VEC3; // total size 0xc
+
+typedef struct {
+  float x, y, z, w;
+} VEC4; // total size 0x10
+
+typedef float MAT34[3][4];
 
 class PlayerSub10 {
 public:
-  PlayerSub10(); // 80577fc4 PAL
-  init(bool unk0, bool unk1); // 805784d4 PAL
-  setInitialPhysicsValues(VEC3 *position, VEC3 *angles); // 80584044 PAL
-  updateAccelerationAndSpeed(); // 8057b9bc PAL
-  updateDiving(); // 805869dc PAL
-  updateTurn(); // 8057a8b4 PAL
+  PlayerSub10(); // 80577fc4
+  init(bool unk0, bool unk1); // 805784d4  
+  setInitialPhysicsValues(VEC3 *position, VEC3 *angles); // 80584044
+  updateAccelerationAndSpeed(); // 8057b9bc
+  updateDiving(); // 805869dc
+  updateTurn(); // 8057a8b4
+  updatePlayerSpeed(); // 8057ab68
+  applyStartBoost(int frames); // 8058212c
 
   PlayerPointers *playerPointers;
   // unknown pointers 0x4, 0x8
-  // vtable 808b5f60 PAL
+  // vtable 808b5f60
   float speedMultiplier; // 50cc: 0.8, 100cc: 0.9, 150cc: 1.0
   float baseSpeed;
   float softSpeedLimit;
   // unknown float 0x1c, maybe another speed limit
-  float nextSpeed;
-  float speed;
+  float currentSpeed;
+  float lastSpeed;
   // unknown float 0x28, maybe last speed
   float hardSpeedLimit;
   float acceleration;
@@ -40,30 +61,41 @@ public:
   // unknown float 0xf8
   int16_t driftState; // 1: charging mt, 2: mt charged
   int16_t mtCharge;
-  // unknown 0x100 - 0x10b
+  int16_t mtCharge2; // second one used by karts
   int16_t mtBoost;
+  // unknown 0x104 - 0x10b
+  int16_t allMTBoost; // also includes the boost from a SSMT and the start boost
   // unknown uint16_t 0x10e
   int16_t mushroomBoost;
   // unknown uint16_t 0x112
   int16_t trickBoost;
-  // unknown uint16_t 0x116, 0x118
+  // unknown uint16_t 0x116
+  uint16_t boostType; 
   // unknown 0x11a - 0x11b
-  // unknown float 0x11c
+  float boostMultiplier; // this gets multiplied with nextspeed which will be the next speed
   float boostAcceleration;
-  // unknown 0x124 - 0x157
+  // unknown 0x124 - 0x147
+  uint16_t zipperBoost; // boost that's mostly used on ramps
+  // unk uint16_t 0x14a
+  uint16_t ssmtCharge;
+  // unknown 0x14e - 0x157
   float realTurn;
   float weightedTurn;
-  // unknown 0x160 - 0x163
+  // float playerSize perhaps?
   VEC3 scale;
   // unknown floats 0x170, 0x174, 0x178
-  // unknown 0x17c - 0x247
-  int16_t MushroomBoost2; // 0x188, another mushroom boost timer
+  // unknown 0x17c - 0x187
+  int16_t mushroomBoost2; // 0x188, another mushroom boost timer
   int16_t starTimer; // 0x18A, timer for Star
   int16_t shockTimer; // 0x18C, used when shocked by KC Zappers, TC, or Shock
-  int16_t BlooperCharacterInk; // 0x18E, timer for ink on player
-  u_int8_t field_0x190; // set to 1 when the blooper state is applied
+  int16_t blooperCharacterInk; // 0x18E, timer for ink on player
+  uint8_t field_0x190; // set to 1 when the blooper state is applied
+  // unknown 0x191
   int16_t crushTimer; // 0x192, timer for being crushed by Thwomp & Mega
   int16_t MegaTimer; // 0x194, timer for Mega mushroom
+  // unknown 0x196 - 0x1C3
+  uint16_t zipperBoost2;
+  // unknown 0x1C6 - 0x248
   uint32_t drivingDirection; // 0: forwards, 1: braking, 2: waiting on the backwards counter, 3: backwards
   uint16_t backwardsAllowCounter;
   // unknown 0x24e - 0x287
@@ -73,22 +105,80 @@ public:
 
 class PlayerSub10Bike {
 public:
-  PlayerSub10Bike(); // 808b5ee8 PAL
-  updateRotationVector(); // 80587d68 PAL
-  updateMtCharge(); // 80588888 PAL
+  PlayerSub10Bike(); // 808b5ee8
+  updateRotationVector(); // 80587d68
+  updateWheelie(); // 80587d64
+  updateMtCharge(); // 80588888
 
-  // vtable 80587b30 PAL
-  // unknown 0x294 - 0x2c3
-  u_int8_t field_0x2AC; // could be a wheelie flag (0 = not in wheelie, 1 = in wheelie), set to 1 when starting wheelie and 0 when ending wheelie?
+  // vtable 80587b30
+  // unknown 0x294 - 0x2a7
+  uint32_t wheelieTimer;
+  uint8_t field_0x2AC; // could be a wheelie flag (0 = not in wheelie, 1 = in wheelie), set to 1 when starting wheelie and 0 when ending wheelie?
+  // unknown 0x2ad - 0x2B3
+  uint16_t wheelietimer2; // from what i know the same as wheelieTimer, but stored as a ushort
+  uint16_t wheelieCooldown;
+  // unknown 0x2b8 - 0x2c3
 }; // Total size 0x2c4
+
+class PlayerSub1c {
+public:
+  PlayerSub1c(PlayerParams *playerParams); // 805943b4
+  updateFromInput(); // 8059487c
+  computeStartBoost(); // 805959d4
+  applyStartBoost(int startBoostIdx); // 80595af8
+
+  // vtable 808b6534
+  uint32_t bitfield0; // bit flags:
+    /*
+       0 accelerate
+       1 drift (manual)
+       2 hop
+       3 brake
+       7 first frame of hop
+       8 first frame of acceleration
+      13 stick left
+      18 ground
+      20 boost
+      24 stick right
+      28 drift (auto)
+      29 wheelie
+    */
+  uint32_t bitfield1; // bit flags:
+    /*
+      20 mt boost
+    */
+  uint32_t bitfield2;
+  uint32_t bitfield3; // bit flags:
+    /*
+       8 start boost charge
+    */
+  uint32_t bitfield4; // bit flags:
+    /*
+       0 cpu-controlled
+       1 real local
+       4 automatic drift
+       6 ghost
+    */
+  // unknown pointer 0x18, contains a pointer to PlayerPointers
+  uint32_t airtime;
+  // unknown 0x20 - 0x27
+  // unknown VEC3 0x28, 0x34
+  // unknown 0x40 - 0x87
+  float stickX;
+  float stickY;
+  // unknown 0x90 - 0x9b
+  float startBoostCharge;
+  int startBoostIdx; // -1 when burning out
+  // unknown 0xa4 - 0xbf
+}; // Total size 0xc0
 
 class PlayerSub {
 public:
-  PlayerSub(PlayerParams *playerParams); // 80595d48 PAL
+  PlayerSub(PlayerParams *playerParams); // 80595d48
 
   PlayerPointers *playerPointers;
   // unknown pointers 0x4, 0x8
-  // vtable 808b659c PAL
+  // vtable 808b659c
   PlayerSub10 *playerSub10;
   PlayerSub14 *playerSub14;
   PlayerSub18 *playerSub18; // contains vehicle body collision data
@@ -98,32 +188,34 @@ public:
 
 class PlayerPhysics {
 private:
-  PlayerPhysics(); // 805b4b54 PAL
+  PlayerPhysics(); // 805b4b54
 
 public:
-  PlayerPhysics(); // 805b4af8 PAL
-  initInertia0(); // 805b4dc4 PAL
-  initInertia1(); // 805b4e84 PAL
-  reset(); // 805b4d24 PAL
-  updatePosition(float one, float maxSpeed, bool unknown); // 805b5170 PAL
-  applyWheelSuspension(VEC3 *unk0, VEC3 *normalAcceleration, VEC3 *unk1, bool unk2); // 805b6150 PAL
+  PlayerPhysics(); // 805b4af8
+  initInertia0(); // 805b4dc4
+  initInertia1(); // 805b4e84
+  reset(); // 805b4d24
+  updatePosition(float one, float maxSpeed, bool unknown); // 805b5170
+  applyWheelSuspension(VEC3 *unk0, VEC3 *normalAcceleration, VEC3 *unk1, bool unk2); // 805b6150
 
-  // vtable 808b7314 PAL
+  // vtable 808b7314
   MAT34 inertiaTensor;
   MAT34 invInertiaTensor;
   float rotationSpeed;
   VEC3 position;
   VEC3 gravitySpeed; // speed caused by gravity and normal force
-  // unknown VEC3 0x80, 0x8c, 0x98, 0xa4
+  // unknown VEC3 0x80, 0x8c, 0x98
+  VEC3 rotVec0; // contains drift, diving and wheel rotation
   VEC3 speed2;
-  // unknown VEC3 0xbc
+  VEC3 rotVec1;
   VEC3 speed3;
   VEC3 speed; // sum of gravitySpeed, engineSpeed, speed2 and speed3
   float speedNorm;
-  VEC3 driftDiveVec; // vector used to compute the orientation of the player
+  VEC3 rotVec2;
   VEC4 rotation0; // as a quaternion
   VEC4 rotation1; // this is probably the next or the previous rotation
-  // unknown VEC3 0x110, 0x11c
+  // unknown VEC3 0x110
+  VEC3 wheelRotVec;
   // unknown VEC4 0x128, 0x138
   float gravity; // 1.3f most of the time
   VEC3 engineSpeed; // speed caused by the vehicle engine
@@ -132,12 +224,12 @@ public:
 
 class PlayerPhysicsBike : PlayerPhysics {
 public:
-  // vtable 808b7300 PAL
+  // vtable 808b7300
 }; // Total size 0x1b4
 
 class CollisionData {
 public:
-  CollisionData(); // 805b821c PAL
+  CollisionData(); // 805b821c
 
   // unknown 0x0 - 0x3
   VEC3 normal;
@@ -150,9 +242,9 @@ public:
 
 class Hitbox {
 public:
-  Hitbox(); // 805b7f48 PAL
-  reset(); // 808b7f84 PAL
-  update(float scale0, float scale1, VEC3 *scale, VEC4 *rotation, VEC3 *centerPosition); // 805b7fbc PAL
+  Hitbox(); // 805b7f48
+  reset(); // 808b7f84
+  update(float scale0, float scale1, VEC3 *scale, VEC4 *rotation, VEC3 *centerPosition); // 805b7fbc
 
   void *bspHitbox; // http://wiki.tockdom.com/wiki/BSP_(File_Format)
   float radius;
@@ -164,11 +256,11 @@ public:
 
 class HitboxGroup {
 public:
-  HitboxGroup(); // 805b82bc PAL
-  HitboxGroup(BspHitbox *hitboxes); // 805b84c0 PAL
-  HitboxGroup(float radius, VEC3 *position); // 805b875c PAL
-  updateBoundingRadius(); // 805b883c PAL
-  reset(); // 805b8330 PAL
+  HitboxGroup(); // 805b82bc
+  HitboxGroup(BspHitbox *hitboxes); // 805b84c0
+  HitboxGroup(float radius, VEC3 *position); // 805b875c
+  updateBoundingRadius(); // 805b883c
+  reset(); // 805b8330
 
   uint16_t hitboxCount;
   // padding 0x2 - 0x3
@@ -182,9 +274,9 @@ public:
 
 class PlayerPhysicsHolder {
 public:
-  PlayerPhysicsHolder(bool isBike, StatsAndBsp *statsAndBsp, void *arg_r5, uint32_t wheelCount); // 805a04a0 PAL
-  init(bool isBike); // 8059f5bc PAL
-  resetQuaternions(); // 805a0410 PAL
+  PlayerPhysicsHolder(bool isBike, StatsAndBsp *statsAndBsp, void *arg_r5, uint32_t wheelCount); // 805a04a0
+  init(bool isBike); // 8059f5bc
+  resetQuaternions(); // 805a0410
 
   // vtable 808b69e8
   PlayerPhysics *playerPhysics;
@@ -201,10 +293,10 @@ public:
 
 class 3DObject {
 public:
-  3DObject(PlayerParams *playerParams, uint32_t unknown); // 80592848 PAL
+  3DObject(PlayerParams *playerParams, uint32_t unknown); // 80592848
 
   // unknown 0x0 - 0xb
-  // vtable 808b6450 PAL
+  // vtable 808b6450
   // unknown VEC3 0x10
   // unknown MAT34 0x1c
   // unknown MAT34 0x4c
@@ -213,7 +305,7 @@ public:
 
 class PlayerGraphics : 3DObject { // tentative name
 public:
-  getWheelMatrixBike(MAT34 *wheelMatrix, uint32_t wheelIdx); // 8056dd54 PAL
+  getWheelMatrixBike(MAT34 *wheelMatrix, uint32_t wheelIdx); // 8056dd54
 
   // unknown 0x8c - 0x8f
   PlayerPhysicsHolder *playerPhysicsHolder;
@@ -239,7 +331,7 @@ class PlayerParams {
 public:
   PlayerParams(uint32_t playerIdx, VehicleId vehicle, CharacterId character, bool isBike, StatsAndBsp *statsAndBsp,
                void *unknown, KartDriverDispParams *kartDriverDispParams, KartPartsDispParams *kartPartsDispParams,
-               BikePartsDispParams *bikePartsDispParams, DriverDispParams *driverDispParams); // 80592fc0 PAL
+               BikePartsDispParams *bikePartsDispParams, DriverDispParams *driverDispParams); // 80592fc0
 
   uint32_t isBike;
   VehicleId vehicle;
@@ -261,13 +353,13 @@ public:
 
 class WheelPhysics {
 public:
-  WheelPhysics(uint32_t wheelIdx, uint32_t bspWheelIdx); // 8059940c PAL
-  initHitboxGroup(); // 80599470 PAL
-  realign(VEC3 *bottomDirection, VEC3 *unknown); // 80599ad0 PAL
+  WheelPhysics(uint32_t wheelIdx, uint32_t bspWheelIdx); // 8059940c
+  initHitboxGroup(); // 80599470
+  realign(VEC3 *bottomDirection, VEC3 *unknown); // 80599ad0
 
   PlayerPointers *playerPointers;
   // unknown pointers 0x4, 0x8
-  // vtable 808b66a4 PAL
+  // vtable 808b66a4
   uint32_t wheelIdx;
   uint32_t bspWheelIdx;
   void *bspWheel; // http://wiki.tockdom.com/wiki/BSP_(File_Format)
@@ -282,13 +374,13 @@ public:
 
 class WheelPhysicsHolder {
 public:
-  WheelPhysicsHolder(uint32_t wheelIdx, bool xMirroredKart, uint32_t bspWheelIdx); // 80599ed4 PAL
-  update(float unknown, VEC3 *gravity, MAT34 *wheelMat); // 8059a278 PAL
-  applySuspensions(VEC3 *forwardDirection, VEC3 *unknown); // 8059a574 PAL
+  WheelPhysicsHolder(uint32_t wheelIdx, bool xMirroredKart, uint32_t bspWheelIdx); // 80599ed4
+  update(float unknown, VEC3 *gravity, MAT34 *wheelMat); // 8059a278
+  applySuspensions(VEC3 *forwardDirection, VEC3 *unknown); // 8059a574
 
   PlayerPointers *playerPointers;
   // unknown 0x4 - 0xb
-  // vtable 808b66b0 PAL
+  // vtable 808b66b0
   void *bspWheel; // http://wiki.tockdom.com/wiki/BSP_(File_Format)
   WheelPhysics *wheelPhysics;
   uint32_t xMirroredKart;
@@ -302,19 +394,19 @@ public:
 
 class Wheel0 : 3DObject {
 public:
-  Wheel0(PlayerParams *playerParams); // 80598b08 PAL
-  init(); // 80598bd4 PAL
+  Wheel0(PlayerParams *playerParams); // 80598b08
+  init(); // 80598bd4
 
-  // vtable 808b6640 PAL
+  // vtable 808b6640
   // unknown 0x8c - 0x8f
   WheelPhysicsHolder *wheelPhysicsHolder;
 }; // Total size 0x94
 
 class Wheel1 : 3DObject {
 public:
-  Wheel1(PlayerParams *playerParams, bool xMirroredKart, uint32_t bspWheelIdx); // 8059aa44 PAL
+  Wheel1(PlayerParams *playerParams, bool xMirroredKart, uint32_t bspWheelIdx); // 8059aa44
 
-  // vtable 808b67e0 PAL
+  // vtable 808b67e0
   // unknown 0x8c - 0x8f
   uint32_t xMirroredKart;
   uint32_t bspWheelIdx;
@@ -324,43 +416,43 @@ public:
 
 class Wheel1Front : Wheel1 {
 public:
-  // vtable 808b6798 PAL
+  // vtable 808b6798
   // unknown 0xa0 - 0xcf
 }; // Total size 0xd0
 
 class PlayerPointers {
 public:
   // all these methods use a double reference to PlayerPointers
-  BikePartsDispParams *getBikePartsDispParams(); // 8059091c PAL
-  Bsp *getBsp(); // 80590888 PAL
+  BikePartsDispParams *getBikePartsDispParams(); // 8059091c
+  Bsp *getBsp(); // 80590888
   ControllerHolder *getControllerHolder();
-  BspWheel *getBspWheel(uint32_t bspWheelIdx); // 805908b4 PAL
-  KartDriverDispParams *getKartDriverDispParams(); // 805908e4 PAL
-  PlayerGraphics *getPlayerGraphics(); // 8059069c PAL
-  uint8_t getPlayerIdx(); // 80590a5c PAL
-  PlayerPhysics *getPlayerPhysics(); // 805903cc PAL
-  PlayerPhysicsHolder *getPlayerPhysicsHolder(); // 805903ac PAL
-  HitboxGroup *getPlayerPhysicsHolderHitboxGroup(); // 805907d8 PAL
-  VEC3 *getPlayerPosition(); // 8059020c PAL
-  Stats *getPlayerStats(); // 80590874 PAL
-  PlayerSub *getPlayerSub(); // 805908d8 PAL
-  PlayerSub *getPlayerSub(); // 80590764 PAL
-  PlayerSub10 *getPlayerSub10(); // 8059077c PAL
-  PlayerSub14 *getPlayerSub14(); // 80590d20 PAL
-  PlayerSub18 *getPlayerSub18(); // 8059084c PAL
-  VEC3 *getScale(); // 805914bc PAL
-  VEC3 *getSpeed(); // 80590d08 PAL
-  VehicleType getVehicleType(); // 80590a10 PAL
-  Wheel0 *getWheel0(uint32_t wheelIdx); // 805906b4 PAL
-  Wheel1 *getWheel1(uint32_t wheelIdx); // 805906dc PAL
-  uint16_t getWheelCount0(); // 805902dc PAL
-  uint16_t getWheelCount1(); // 805902ec PAL
-  WheelPhysics *getWheelPhysics(uint32_t wheelIdx); // 80590734 PAL
-  CollisionData *getWheelPhysicsCollisionData(uint32_t wheelIdx); // 80590834 PAL
-  WheelPhysicsHolder *getWheelPhysicsHolder(uint32_t wheelIdx); // 80590704 PAL
-  bool isBike(); // 80590a6c PAL
-  setPlayerPosition(VEC3 *position); // 80590238 PAL
-  setPlayerRotation(VEC4 *rotation); // 80590288 PAL
+  BspWheel *getBspWheel(uint32_t bspWheelIdx); // 805908b4
+  KartDriverDispParams *getKartDriverDispParams(); // 805908e4
+  PlayerGraphics *getPlayerGraphics(); // 8059069c
+  uint8_t getPlayerIdx(); // 80590a5c
+  PlayerPhysics *getPlayerPhysics(); // 805903cc
+  PlayerPhysicsHolder *getPlayerPhysicsHolder(); // 805903ac
+  HitboxGroup *getPlayerPhysicsHolderHitboxGroup(); // 805907d8
+  VEC3 *getPlayerPosition(); // 8059020c
+  Stats *getPlayerStats(); // 80590874
+  PlayerSub *getPlayerSub(); // 805908d8
+  PlayerSub *getPlayerSub(); // 80590764
+  PlayerSub10 *getPlayerSub10(); // 8059077c
+  PlayerSub14 *getPlayerSub14(); // 80590d20
+  PlayerSub18 *getPlayerSub18(); // 8059084c
+  VEC3 *getScale(); // 805914bc
+  VEC3 *getSpeed(); // 80590d08
+  VehicleType getVehicleType(); // 80590a10
+  Wheel0 *getWheel0(uint32_t wheelIdx); // 805906b4
+  Wheel1 *getWheel1(uint32_t wheelIdx); // 805906dc
+  uint16_t getWheelCount0(); // 805902dc
+  uint16_t getWheelCount1(); // 805902ec
+  WheelPhysics *getWheelPhysics(uint32_t wheelIdx); // 80590734
+  CollisionData *getWheelPhysicsCollisionData(uint32_t wheelIdx); // 80590834
+  WheelPhysicsHolder *getWheelPhysicsHolder(uint32_t wheelIdx); // 80590704
+  bool isBike(); // 80590a6c
+  setPlayerPosition(VEC3 *position); // 80590238
+  setPlayerRotation(VEC4 *rotation); // 80590288
 
   PlayerParams *params;
   PlayerSub1c *playerSub1c;
@@ -380,18 +472,18 @@ class Player {
 private:
   Player(uint32_t idx, VehicleId vehicle, CharacterId character, bool isBike, StatsAndBsp *statsAndBsp, void *unknown,
          KartDriverDispParams *kartDriverDispParams, KartPartsDispParams *kartPartsDispParams, BikePartsDispParams
-         *bikePartsDispParams, DriverDispParams *driverDispParams); // 8058ddbc PAL
+         *bikePartsDispParams, DriverDispParams *driverDispParams); // 8058ddbc
 
 public:
-  Player(uint32_t idx, VehicleId vehicle, CharacterId character, bool isBike); // 8058f5b4 PAL
-  update(); // 8058eeb4 PAL
-  update2(); // 8058eebc PAL
-  initWheels(); // 8058ea0c PAL
+  Player(uint32_t idx, VehicleId vehicle, CharacterId character, bool isBike); // 8058f5b4
+  update(); // 8058eeb4
+  update2(); // 8058eebc
+  initWheels(); // 8058ea0c
 
   PlayerPointers *playerPointers; // a pointer to the inline instance at 0x1c
   // unknown pointer 0x4
   // unknown pointer 0x8
-  // vtable 0x808b63ec PAL
+  // vtable 0x808b63ec
   PlayerSub *playerSub;
   PlayerParams *params;
   // unknown pointer 0x18
@@ -400,16 +492,25 @@ public:
 
 class PlayerBike : Player {
 public:
-  initWheels(); // 8058f2e8 PAL
+  initWheels(); // 8058f2e8
 
-  // vtable 0x808b63d0 PAL
+  // vtable 0x808b63d0
 }; // Total size 0x80
 
-class PlayerHolder : public PlayerHolderSub {
+class PlayerHolderSub {
+  // vtable 802a2b48
+  // unknown 0x4-f
+}; // Total size 0x10
+
+class PlayerHolder : public PlayerHolderSub { // vtable override 808b6408
 public:
-  PlayerHolder(); // 8058faa8 PAL
-  Player *PlayerHolderGetPlayer(uint32_t idx); // 80590100 PAL
-  void update(); // 8058ffe8 PAL
+  static PlayerHolder * sInstance; // 809c18f8
+  static PlayerHolder * getStaticInstance(); // 8058faa8
+  static void destroyStaticInstance(); // 8058faf8
+
+  PlayerHolder(); // 8058fb2c
+  Player *PlayerHolderGetPlayer(uint32_t idx); // 80590100
+  void update(); // 8058ffe8
 
   PlayerHolderSub secondPHS;
   Player **players;

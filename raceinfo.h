@@ -1,18 +1,13 @@
 /*
 Raceinfo is a class that stores various information about the race and players, as well as handling some RNG
-A pointer to an instance of this class is stored at 0x809bd730 PAL
-Thanks to _tZ and Kevin for help with this, and Leseratte for the race finish time fields
-*/
 
-class Random { // I'll move this at some point
-  virtual ~Random; // 80555538 PAL
-  Random(); // 80555464 PAL
-  int next(); // 80555578 PAL
-  int nextLimited(int limit); // 805555cc PAL
-  
-  // vtable 808b42e0 PAL
-  // 0x4-17 is unknown
-}; // Total size 0x18
+Contributors:
+  Seeky (main documentation)
+  _tZ (RaceinfoPlayer attributes)
+  Kevin (various attributes)
+  Leseratte (race finish time attributes)
+  stebler (intro timer attribute)
+*/
 
 class GmDataAbstract {
   // vtable
@@ -20,17 +15,17 @@ class GmDataAbstract {
 }; // Total size 0x8
 
 class GmDataOnlineVsPlayer {
-  GmDataOnlineVsPlayer(); // 80532488 PAL
+  GmDataOnlineVsPlayer(); // 80532488
   
   Timer raceFinishTime;
   // unknown 0xc-13
 }; // Total size 0x14
 
-class GmDataOnlineVs : public GmDataAbstract { // vtable override 808b3928 PAL
+class GmDataOnlineVs : GmDataAbstract { // vtable override 808b3928
   // unknown virtual function 1
-  virtual updateLocalPlayers(); // 8053fb98 PAL
+  virtual updateLocalPlayers(); // 8053fb98
   // unknown virtual function 3
-  virtual handlePositionTracking(); // 8053f4a0 PAL
+  virtual handlePositionTracking(); // 8053f4a0
   // unknown virtual functions 5-9
   // constructor was inlined
   
@@ -40,10 +35,10 @@ class GmDataOnlineVs : public GmDataAbstract { // vtable override 808b3928 PAL
 }; // Total size 0x174
 
 class Timer {
-  virtual ~Timer(); // 8051c334 PAL
-  Timer(); // 8051c374 PAL
+  virtual ~Timer(); // 8051c334
+  Timer(); // 8051c374
   
-  // vtable 808b2d44 PAL
+  // vtable 808b2d44
   uint16_t minutes;
   uint8_t seconds;
   // padding 0x7
@@ -52,42 +47,46 @@ class Timer {
 }; // Total size 0xc
 
 class TimerManager {
-  virtual ~TimerManager(); // 805376e0 PAL
-  virtual reset(); // 80535864 PAL
-  virtual update(); // 80535904 PAL
+  virtual ~TimerManager(); // 805376e0
+  virtual reset(); // 80535864
+  virtual update(); // 80535904
   // constructor was inlined
   
-  // vtable 808b34b0 PAL
+  // vtable 808b34b0
   Timer timers[3];
   Random random;
   // unknown 0x40-4f
 }; // Total size 0x50
 
-class RaceinfoRandom : public Random {
-  RaceinfoRandom(int param_2);
+class RaceinfoRandom : Random {
+  RaceinfoRandom(int32_t r4); // 80555514
 }; // Total size 0x18
 
 class RaceinfoPlayer {
-  virtual ~RaceinfoPlayer(); // 80532f48 PAL
-  RaceinfoPlayer(uint8_t id, uint32_t param_3); // 80533ed8 PAL
+  virtual ~RaceinfoPlayer(); // 80532f48
+  RaceinfoPlayer(uint8_t id, uint32_t param_3); // 80533ed8
   
-  // vtable 808b34a4 PAL
+  // vtable 808b34a4
   // unknown 0x4-7
   uint8_t id;
   uint8_t unknown_0x9; // might be padding
   uint16_t checkpoint;
   float raceCompletion; // fraction of way through a lap (ex. 1.0 is the start of lap 1, 2.5 is half way through lap 2)
   float raceCompletionMax;
-  float unknown_0x14;
+  float firstKcpLapCompletion;
   float nextCheckpointLapCompletion;
   float nextCheckpointLapCompletionMax;
   uint8_t position;
-  // unknown 0x21-23
-  uint8_t currentLap;
+  uint8_t respawn;
+  // unknown 0x22-23
+  uint16_t currentLap;
   uint8_t maxLap;
   uint8_t currentKCP;
   uint8_t maxKCP;
-  // unknown 0x29-37
+  // unknown 0x29-2b
+  uint32_t frameCounter;
+  uint32_t framesInFirst;
+  // unknow 0x34-37
   uint32_t stateFlags; // bit flags:
     /*
       64 is coming last animation?
@@ -105,19 +104,24 @@ class RaceinfoPlayer {
 }; // Total size 0x54
 
 class Raceinfo {
-  virtual ~Raceinfo(); // 80532e3c PAL
-  Raceinfo(); // 805327a0 PAL
-  RaceinfoRandom * getRandom(); // 807bd718 PAL
-  void * setupGamemodeData(Gamemode mode); // 80532188 PAL
+  static Raceinfo * sInstance; // 809bd730
+  static Raceinfo * getStaticInstance(); // 80532084
+  static void destroyStaticInstance(); // 805320d4
 
-  //vtable 808b3350 PAL
+  virtual ~Raceinfo(); // 80532e3c
+  Raceinfo(); // 805327a0
+  RaceinfoRandom * getRandom(); // 807bd718
+  void * setupGamemodeData(Gamemode mode); // 80532188
+
+  // vtable 808b3350
   RaceinfoRandom random1;
   RaceinfoRandom random2;
   RaceinfoPlayer ** players; // pointer to an array of pointers, length is player count
   void * gamemodeData; // different class for each gamemode
   TimerManager * timerManager;
   uint8_t * playerIdInEachPosition; // pointer to an array of player ids, 0 is the id in 1st, 1 is 2nd...
-  // unknown 0x1c-1f
+  // unknown 0x1c-1d
+  int16_t introTimer;
   uint32_t timer;
   // unknown 0x24-2d
   bool canCountdownStart; // instantly true offline, needs syncing online
