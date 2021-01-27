@@ -26,8 +26,8 @@ typedef struct {
 } ROOMPacket; // Total size 0x4 (often kept in a register rather than pointed to)
 
 class ROOMHandler {
-  static ROOMHandler * sInstance; // 8065aa88
-  static ROOMHandler * getStaticInstance(); // 809c20e0
+  static ROOMHandler * sInstance; // 809c20e0
+  static ROOMHandler * getStaticInstance(); // 8065aa88
   static void destroyStaticInstance(); // 8065ab4c
 
   ~ROOMHandler(); // 8065b008
