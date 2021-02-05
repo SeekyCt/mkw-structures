@@ -7,6 +7,7 @@ Contributors:
   Kevin (various attributes)
   Leseratte (race finish time attributes)
   stebler (intro timer attribute)
+  Melg (battle score attribute)
 */
 
 class GmDataAbstract {
@@ -78,7 +79,7 @@ class RaceinfoPlayer {
   float nextCheckpointLapCompletionMax;
   uint8_t position;
   uint8_t respawn;
-  // unknown 0x22-23
+  uint16_t battleScore;
   uint16_t currentLap;
   uint8_t maxLap;
   uint8_t currentKCP;
