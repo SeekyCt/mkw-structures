@@ -113,6 +113,7 @@ class Raceinfo {
   Raceinfo(); // 805327a0
   RaceinfoRandom * getRandom(); // 807bd718
   void * setupGamemodeData(Gamemode mode); // 80532188
+  bool isStage(uint32_t stage);
 
   // vtable 808b3350
   RaceinfoRandom random1;
@@ -124,7 +125,9 @@ class Raceinfo {
   // unknown 0x1c-1d
   int16_t introTimer;
   uint32_t timer;
-  // unknown 0x24-2d
+  // unknown 0x24-27
+  uint32_t stage; // 0: intro camera, 1: countdown, 2: race
+  // unknown 0x2c-2d
   bool canCountdownStart; // instantly true offline, needs syncing online
   bool cutSceneMode; // true for modes 11 & 12
   // unknown 0x30-3b

@@ -24,14 +24,35 @@ typedef float MAT34[3][4];
 
 class PlayerSub10 {
 public:
+  virtual ~PlayerSub10(); // 80587b78
+  // unknown virtual function 1
+  virtual setTurnParams(); // 8057829c
+  // unknown virtual functions 3-12
+  virtual bool checkWheelie(); // 80589744
+  virtual updateTurn(); // 8057a8b4
+  virtual updateVehicleSpeed(); // 8057ab68
+  // unknown virtual function 16
+  virtual updateVehicleRotationVector(float turn); // 8057cf0c
+  virtual float getWheelieSoftSpeedLimitBonus(); // 8057c3c8
+  virtual updateWheelie(); // 8058758c
+  // unknown virtual function 19
+  virtual bool canHop(); // 8057da18
+  virtual hop(); // 8057da5c
+  virtual updateMtCharge(); // 8057ee50
+  // unknown virtual function 23
   PlayerSub10(); // 80577fc4
-  init(bool unk0, bool unk1); // 805784d4  
-  setInitialPhysicsValues(VEC3 *position, VEC3 *angles); // 80584044
-  updateAccelerationAndSpeed(); // 8057b9bc
-  updateDiving(); // 805869dc
-  updateTurn(); // 8057a8b4
-  updatePlayerSpeed(); // 8057ab68
+  init(bool unk0, bool unk1); // 805784d4
+  update(); // 805788dc
+  updateDir(); // 8057a140
+  updateAcceleration(); // 8057b9bc
+  updateRotation(); // 8057c69c
+  updateStandstillBoostRot(); // 8057d1d4
+  updateTop(); // 8057d398
+  updateManualDrift(); // 8057dc44
+  updateAutoDrift(); // 8057e0dc
   applyStartBoost(int frames); // 8058212c
+  setInitialPhysicsValues(VEC3 *position, VEC3 *angles); // 80584044
+  updateDiving(); // 805869dc
 
   PlayerPointers *playerPointers;
   // unknown pointers 0x4, 0x8
@@ -40,23 +61,32 @@ public:
   float baseSpeed;
   float softSpeedLimit;
   // unknown float 0x1c, maybe another speed limit
-  float currentSpeed;
+  float vehicleSpeed;
   float lastSpeed;
   // unknown float 0x28, maybe last speed
   float hardSpeedLimit;
   float acceleration;
   float speedDragMultiplier;
-  VEC3 directions[8]; // some of these are the top direction, others the front direction
+  // unknown VEC3 0x38
+  VEC3 top;
+  // unknown VEC3 0x50
+  VEC3 dir;
+  VEC3 lastDir;
+  VEC3 vehicleSpeedDir;
+  // unknown VEC3 0x80
+  VEC3 dirDiff;
   // unknown uint8_t 0x98
   // unknown 0x99 - 0x9b, likely padding
   // unknown floats 0x9c, 0xa0
   // unknown VEC3 0xa4
-  // unknown float 0xb0
-  // unknown 0xb4 - 0xb7
+  float speedRatioCapped; // to 1
+  float speedRatio;
   // unknown float 0xb8
   float rotationFactor;
   // unknown floats 0xc0, 0xc4
-  // unknown 0xc8 - 0xf3
+  // unknown 0xc8 - 0xdf
+  VEC3 hopDir;
+  // unknown 0xec - 0xf3
   float divingRotation;
   // unknown float 0xf8
   int16_t driftState; // 1: charging mt, 2: mt charged
@@ -103,21 +133,48 @@ public:
   // unknown 0x28c - 0x293
 }; // Total size 0x294
 
-class PlayerSub10Bike {
-public:
-  PlayerSub10Bike(); // 808b5ee8
-  updateRotationVector(); // 80587d68
-  updateWheelie(); // 80587d64
-  updateMtCharge(); // 80588888
+class PlayerSub10Remote : PlayerSub10 {
+  // vtable 808b5d90
+}; // Total size 0x294
 
-  // vtable 80587b30
-  // unknown 0x294 - 0x2a7
+class PlayerSub10RealLocal : PlayerSub10 {
+  // vtable 808b5e78
+}; // Total size 0x294
+
+class PlayerSub10Bike : PlayerSub10 {
+public:
+  virtual ~PlayerSub10Bike(); // 80589704
+  virtual bool checkWheelie(); // 80588fe0
+  virtual updateVehicleRotationVector(float turn); // 80587d68
+  virtual getWheelieSoftSpeedLimitBonus(); // 80588324
+  virtual updateWheelie(); // 80587d64
+  virtual updateMtCharge(); // 80588888
+  virtual startWheelie(); // 80588350
+  virtual cancelWheelie(); // 805883c4
+  // unknown virtual function 26
+  PlayerSub10Bike(); // 808b5ee8
+
+  // vtable 808b5ee8
+  float turnRotZ;
+  // unknown float 0x298
+  float turnRotZInc;
+  float wheelieRot;
+  float maxWheelieRot;
   uint32_t wheelieTimer;
   uint8_t field_0x2AC; // could be a wheelie flag (0 = not in wheelie, 1 = in wheelie), set to 1 when starting wheelie and 0 when ending wheelie?
   // unknown 0x2ad - 0x2B3
   uint16_t wheelietimer2; // from what i know the same as wheelieTimer, but stored as a ushort
   uint16_t wheelieCooldown;
-  // unknown 0x2b8 - 0x2c3
+  // unknown 0x2b8 - 0x2bf
+  void *turnParams;
+}; // Total size 0x2c4
+
+class PlayerSub10BikeRemote : PlayerSub10Bike {
+  // vtable 808b5d18
+}; // Total size 0x2c4
+
+class PlayerSub10BikeRealLocal : PlayerSub10Bike {
+  // vtable 808b5e00
 }; // Total size 0x2c4
 
 class PlayerSub1c {
@@ -126,6 +183,7 @@ public:
   updateFromInput(); // 8059487c
   computeStartBoost(); // 805959d4
   applyStartBoost(int startBoostIdx); // 80595af8
+  updateCollisions(); // 80594bd4
 
   // vtable 808b6534
   uint32_t bitfield0; // bit flags:
@@ -136,8 +194,11 @@ public:
        3 brake
        7 first frame of hop
        8 first frame of acceleration
+      11 floor collision with any wheel
+      12 floor collision with all wheels
       13 stick left
       18 ground
+      19 hop
       20 boost
       24 stick right
       28 drift (auto)
@@ -147,7 +208,10 @@ public:
     /*
       20 mt boost
     */
-  uint32_t bitfield2;
+  uint32_t bitfield2; // bit flags:
+    /*
+      27 in a bullet
+    */
   uint32_t bitfield3; // bit flags:
     /*
        8 start boost charge
@@ -156,13 +220,16 @@ public:
     /*
        0 cpu-controlled
        1 real local
+       2 local
+       3 remote
        4 automatic drift
        6 ghost
     */
   // unknown pointer 0x18, contains a pointer to PlayerPointers
   uint32_t airtime;
   // unknown 0x20 - 0x27
-  // unknown VEC3 0x28, 0x34
+  VEC3 top;
+  // unknown VEC3 0x34
   // unknown 0x40 - 0x87
   float stickX;
   float stickY;
@@ -191,11 +258,14 @@ private:
   PlayerPhysics(); // 805b4b54
 
 public:
+  virtual ~PlayerPhysics(); // 8059f678
+  virtual stabilize(); // 805b5b68
+  // unknown virtual function 2
   PlayerPhysics(); // 805b4af8
   initInertia0(); // 805b4dc4
   initInertia1(); // 805b4e84
   reset(); // 805b4d24
-  updatePosition(float one, float maxSpeed, bool unknown); // 805b5170
+  update(float one, float maxSpeed, bool unknown); // 805b5170
   applyWheelSuspension(VEC3 *unk0, VEC3 *normalAcceleration, VEC3 *unk1, bool unk2); // 805b6150
 
   // vtable 808b7314
@@ -224,6 +294,9 @@ public:
 
 class PlayerPhysicsBike : PlayerPhysics {
 public:
+  virtual ~PlayerPhysicsBike(); // 805b66e4
+  virtual stabilize(); // 805b6448
+
   // vtable 808b7300
 }; // Total size 0x1b4
 
@@ -442,6 +515,7 @@ public:
   PlayerSub18 *getPlayerSub18(); // 8059084c
   VEC3 *getScale(); // 805914bc
   VEC3 *getSpeed(); // 80590d08
+  VEC3 *getSpeedRatioCapped(); // 80590dc0
   VehicleType getVehicleType(); // 80590a10
   Wheel0 *getWheel0(uint32_t wheelIdx); // 805906b4
   Wheel1 *getWheel1(uint32_t wheelIdx); // 805906dc
@@ -451,6 +525,7 @@ public:
   CollisionData *getWheelPhysicsCollisionData(uint32_t wheelIdx); // 80590834
   WheelPhysicsHolder *getWheelPhysicsHolder(uint32_t wheelIdx); // 80590704
   bool isBike(); // 80590a6c
+  bool isCpu(); // 80590664
   setPlayerPosition(VEC3 *position); // 80590238
   setPlayerRotation(VEC4 *rotation); // 80590288
 
