@@ -116,8 +116,8 @@ class Raceinfo {
   bool isStage(uint32_t stage);
 
   // vtable 808b3350
-  RaceinfoRandom random1;
-  RaceinfoRandom random2;
+  RaceinfoRandom * random1;
+  RaceinfoRandom * random2;
   RaceinfoPlayer ** players; // pointer to an array of pointers, length is player count
   void * gamemodeData; // different class for each gamemode
   TimerManager * timerManager;
