@@ -24,7 +24,7 @@ class PacketHolder {
 } PacketHolder; // Total size 0xc
 
 class SplitRACEPointers {
-  SplitRACEPointers(uint32_t bufferSize); // 8065a3dc
+  SplitRACEPointers(); // 8065a3dc
   ~SplitRACEPointers(); // 8065a474
   
   PacketHolder * header;
