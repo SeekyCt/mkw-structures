@@ -21,7 +21,7 @@ class ItemSlotData {
   virtual ~ItemSlotData(); // 807ba650
   int32_t decideItem(int32_t itemboxSetting, int32_t position, int32_t r6, int32_t r7, void * r8); // 807bb42c
   uint8_t * processTableAndIter(uint8_t * itemTable, ItemSlotTableHolder * tableHolder, bool updateItemsInWheek, bool isSpecialTable); // 807ba9d8, takes a pointer to a raw table in an item slot file, processes the values and writes them to the data field of the table holder, then returns the pointer to the start of the next table
-  void scaleTableForPlayerCount(ItemSlotTableHolder * tableHolder)// 807bad20
+  void scaleTableForPlayerCount(ItemSlotTableHolder * tableHolder); // 807bad20
   void resetLightningTimer(); // 807bb9bc
   void resetBlueShellTimer(); // 807bb9c8, goes unused
   void resetBlooperTimer(); // 807bb9d4
