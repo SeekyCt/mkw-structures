@@ -189,9 +189,9 @@ public:
   uint32_t bitfield0; // bit flags:
     /*
        0 accelerate
-       1 drift (manual)
+       1 brake
        2 hop
-       3 brake
+       3 drift (manual)
        7 first frame of hop
        8 first frame of acceleration
       11 floor collision with any wheel
