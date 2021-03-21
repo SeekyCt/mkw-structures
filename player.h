@@ -51,6 +51,7 @@ public:
   updateManualDrift(); // 8057dc44
   updateAutoDrift(); // 8057e0dc
   applyStartBoost(int frames); // 8058212c
+  releaseMt(int unk0, int unk1); // 80582f9c
   setInitialPhysicsValues(VEC3 *position, VEC3 *angles); // 80584044
   updateDiving(); // 805869dc
 
@@ -83,7 +84,8 @@ public:
   float speedRatio;
   // unknown float 0xb8
   float rotationFactor;
-  // unknown floats 0xc0, 0xc4
+  float kclSpeedFactor;
+  float kclHandlingMalus;
   // unknown 0xc8 - 0xdf
   VEC3 hopDir;
   // unknown 0xec - 0xf3
@@ -104,8 +106,11 @@ public:
   // unknown 0x11a - 0x11b
   float boostMultiplier; // this gets multiplied with nextspeed which will be the next speed
   float boostAcceleration;
-  // unknown 0x124 - 0x147
-  uint16_t zipperBoost; // boost that's mostly used on ramps
+  // unknown 0x124 - 0x12b
+  int16_t zipperBoost;
+  int16_t zipperBoostMax;
+  // unknown 0x130 - 0x147
+  int16_t multiBoost; // at least for zippers and mushrooms
   // unk uint16_t 0x14a
   uint16_t ssmtCharge;
   // unknown 0x14e - 0x157
@@ -113,8 +118,11 @@ public:
   float weightedTurn;
   // float playerSize perhaps?
   VEC3 scale;
-  // unknown floats 0x170, 0x174, 0x178
-  // unknown 0x17c - 0x187
+  // unknown float 0x170
+  float someScale;
+  float shockSpeedMultiplier;
+  float megaScale;
+  // unknown 0x180 - 0x187
   int16_t mushroomBoost2; // 0x188, another mushroom boost timer
   int16_t starTimer; // 0x18A, timer for Star
   int16_t shockTimer; // 0x18C, used when shocked by KC Zappers, TC, or Shock
@@ -130,7 +138,9 @@ public:
   uint16_t backwardsAllowCounter;
   // unknown 0x24e - 0x287
   float rawTurn;
-  // unknown 0x28c - 0x293
+  // unknown float 0x28c
+  int16_t ghostVanishTimer;
+  // unknown 0x292 - 0x293
 }; // Total size 0x294
 
 class PlayerSub10Remote : PlayerSub10 {
@@ -144,6 +154,7 @@ class PlayerSub10RealLocal : PlayerSub10 {
 class PlayerSub10Bike : PlayerSub10 {
 public:
   virtual ~PlayerSub10Bike(); // 80589704
+  virtual setTurnParams(); // 80587c54
   virtual bool checkWheelie(); // 80588fe0
   virtual updateVehicleRotationVector(float turn); // 80587d68
   virtual getWheelieSoftSpeedLimitBonus(); // 80588324
@@ -177,6 +188,29 @@ class PlayerSub10BikeRealLocal : PlayerSub10Bike {
   // vtable 808b5e00
 }; // Total size 0x2c4
 
+class PlayerSub14 {
+  PlayerSub14(); // 805672cc
+}; // Total size 0x100
+
+class PlayerSub18 {
+public:
+  // unknown virtual functions 0-1
+  virtual ~PlayerSub18(); // 80573ff0
+
+  PlayerSub18(); // 8056e56c
+  updateCollisions(); // 80572c20
+  activeOob(int unk0, int unk1, int unk2, int unk3); // 80573b00
+  updateRespawn(); // 80573ed4
+  updateCollisionsInner(float unk0, float unk1, uint32_t playerIdx, PlayerPhysics *playerPhysics, collisionGroup *collisionGroup, VEC4 *rotation, VEC3 *scale, bool enableHwg, VEC3 *unk2); // 805b6724
+
+  // vtable 808b56a8
+  PlayerPointers *playerPointers;
+  // unknown 0x8 - 0x47
+  int16_t preRespawnTimer;
+  int16_t oobTimer;
+  // unknown 0x4c - 0x73
+}; // Total size 0x74
+
 class PlayerSub1c {
 public:
   PlayerSub1c(PlayerParams *playerParams); // 805943b4
@@ -192,6 +226,7 @@ public:
        1 brake
        2 hop
        3 drift (manual)
+       4 oob, before being respawned
        7 first frame of hop
        8 first frame of acceleration
       11 floor collision with any wheel
@@ -206,14 +241,24 @@ public:
     */
   uint32_t bitfield1; // bit flags:
     /*
+       1 first frame of respawn
+       3 first frame of cannon
+       4 in cannon
+       7 multi boost (zipper, mushroom)
+      13 zipper boost
       20 mt boost
+      31 in a star
     */
   uint32_t bitfield2; // bit flags:
     /*
+       7 shocked
+      15 in a mega
+      16 crushed
       27 in a bullet
     */
   uint32_t bitfield3; // bit flags:
     /*
+       5 hwg (horizontal wall glitch)
        8 start boost charge
     */
   uint32_t bitfield4; // bit flags:
@@ -230,12 +275,14 @@ public:
   // unknown 0x20 - 0x27
   VEC3 top;
   // unknown VEC3 0x34
-  // unknown 0x40 - 0x87
+  // unknown 0x40 - 0x6b
+  int32_t hwgTimer;
+  // unknown 0x70 - 0x87
   float stickX;
   float stickY;
   // unknown 0x90 - 0x9b
   float startBoostCharge;
-  int startBoostIdx; // -1 when burning out
+  int32_t startBoostIdx; // -1 when burning out
   // unknown 0xa4 - 0xbf
 }; // Total size 0xc0
 
@@ -321,7 +368,7 @@ public:
 
   void *bspHitbox; // http://wiki.tockdom.com/wiki/BSP_(File_Format)
   float radius;
-  // unknown int 0x8
+  // unknown int32_t 0x8
   VEC3 position;
   VEC3 lastPosition;
   // unknown VEC3 0x24
@@ -400,6 +447,19 @@ public:
   Bsp *bsp; // http://wiki.tockdom.com/wiki/BSP_(File_Format)
 }; // Total size 0x8
 
+class GpStats {
+public:
+  bool startBoostSuccessful;
+  // unknown 0x1 - 0x3, maybe padding
+  uint32_t mtCount;
+  uint32_t offroadFrames;
+  // unknown uint32_t 0xc
+  uint32_t objectCollisionCount;
+  uint32_t oobCount;
+  // unknown uint16_t 0x18
+  // unknown 0x1a - 0x1b, maybe padding
+}; // Total size 0x1c
+
 class PlayerParams {
 public:
   PlayerParams(uint32_t playerIdx, VehicleId vehicle, CharacterId character, bool isBike, StatsAndBsp *statsAndBsp,
@@ -421,7 +481,8 @@ public:
   DriverDispParams *driverDispParams;
   float wheelCountRecip;
   float wheelCountPlusOneRecip; // 1.0f / (wheelCount + 1.0f)
-  // unknown 0x34 - 0x3b
+  GpStats *gpStats;
+  // unknown 0x38 - 0x3b
 }; // Total size 0x3c
 
 class WheelPhysics {

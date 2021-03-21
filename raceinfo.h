@@ -66,6 +66,7 @@ class RaceinfoRandom : Random {
 class RaceinfoPlayer {
   virtual ~RaceinfoPlayer(); // 80532f48
   RaceinfoPlayer(uint8_t id, uint32_t param_3); // 80533ed8
+  updateGpRankScore(); // 805368f8
   
   // vtable 808b34a4
   // unknown 0x4-7
