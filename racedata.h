@@ -94,6 +94,7 @@ typedef struct {
 class RacedataPlayer {
     virtual ~RacedataPlayer(); // 8052DC68
     RacedataPlayer(); // 8052d96c
+    uint32_t computeGpRank(); // 8052daf0
     
     // vtable 808b3294
     uint8_t unknown_0x4;
@@ -108,7 +109,9 @@ class RacedataPlayer {
     // Unknown 0xd0-d7
     uint16_t previousScore;
     uint16_t score;
-    // Unknown 0xdc-e0
+    // Unknown 0xdc-dd
+    int16_t gpRankScore;
+    // Unknown 0xe0
     uint8_t prevFinishPos;
     // unknown 0xe2-e7
     int16_t rating; // vr or br, depending on mode
