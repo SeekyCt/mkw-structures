@@ -27,11 +27,15 @@ public:
   virtual ~PlayerSub10(); // 80587b78
   // unknown virtual function 1
   virtual setTurnParams(); // 8057829c
-  // unknown virtual functions 3-12
+  // unknown virtual function 3
+  virtual activateStar(); // 80580268
+  virtual activateMega(); // 80580b14
+  applyInk(int unk); // 80581a58
+  // unknown virtual functions 7-12
   virtual bool checkWheelie(); // 80589744
   virtual updateTurn(); // 8057a8b4
   virtual updateVehicleSpeed(); // 8057ab68
-  // unknown virtual function 16
+  virtual updateTopDuringAirtime(); // 8057d888
   virtual updateVehicleRotationVector(float turn); // 8057cf0c
   virtual float getWheelieSoftSpeedLimitBonus(); // 8057c3c8
   virtual updateWheelie(); // 8058758c
@@ -50,10 +54,15 @@ public:
   updateTop(); // 8057d398
   updateManualDrift(); // 8057dc44
   updateAutoDrift(); // 8057e0dc
+  activateMushroom(); // 8057f3d8
+  applyLightning(); // 80580438
+  applyLightningEffect(int frames, int unk0, int unk1); // 80580778
   applyStartBoost(int frames); // 8058212c
   releaseMt(int unk0, int unk1); // 80582f9c
   setInitialPhysicsValues(VEC3 *position, VEC3 *angles); // 80584044
+  activateBullet(int unk); // 805858ac
   updateDiving(); // 805869dc
+  updateSlipstream(); // 80586fa8
 
   PlayerPointers *playerPointers;
   // unknown pointers 0x4, 0x8
@@ -198,7 +207,17 @@ public:
   virtual ~PlayerSub18(); // 80573ff0
 
   PlayerSub18(); // 8056e56c
+  checkPlayerCollision(PlayerPointers **otherPlayer); // 8056f7f0
+  checkItemCollision(); // 8057257c
   updateCollisions(); // 80572c20
+  int handleNoopCollision(); // 80573170
+  int handleBananaCollision(); // 80573178
+  int handleShellCollision(); // 80573190
+  int handleBlueShellCollision(); // 805731b0
+  int handleBombCollision(); // 805731c8
+  int handleMushroomCollision(); // 805731e0
+  int handleStarCollision(); // 80573224
+  int handleFibCollision(); // 8057325c
   activeOob(int unk0, int unk1, int unk2, int unk3); // 80573b00
   updateRespawn(); // 80573ed4
   updateCollisionsInner(float unk0, float unk1, uint32_t playerIdx, PlayerPhysics *playerPhysics, collisionGroup *collisionGroup, VEC4 *rotation, VEC3 *scale, bool enableHwg, VEC3 *unk2); // 805b6724
@@ -251,6 +270,8 @@ public:
     */
   uint32_t bitfield2; // bit flags:
     /*
+       0 charging a slipstream
+       1 in a slipstream
        7 shocked
       15 in a mega
       16 crushed
