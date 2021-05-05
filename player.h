@@ -22,6 +22,69 @@ typedef struct {
 
 typedef float MAT34[3][4];
 
+class PlayerTrick {
+public:
+  virtual ~PlayerTrick(); // 80575aa8
+  // unknown virtual functions 1 - 2
+  virtual void updateRot(); // 805764fc
+  PlayerTrick(); // 80575a44
+  void tryStart(VEC3 *unk0); // 80575d7c
+  void update(); // 805763e4
+
+  PlayerPointers *pointers;
+  // unknown 0x4 - 0xb
+  // vtable 808b58b0
+  // unknown 0x10 - 0x13
+  int type; // 0: stunt, 1: single flip, 2: double flip
+  // unknown 0x18 - 0x4f
+}; // total size 0x50
+
+class PlayerTrickBike : PlayerTrick {
+public:
+  virtual ~PlayerTrickBike(); // 80576afc
+  virtual void updateRot(); // 80576994
+
+  // vtable 808b5890
+}; // total size 0x50
+
+class PlayerZipper {
+public:
+  virtual ~PlayerZipper(); // 80574170
+  PlayerZipper(); // 80574114
+  void update(); // 80574340
+
+  PlayerPointers *pointers;
+  // unknown 0x4 - 0xb
+  // vtable 808b5798
+}; // total size 0x90
+
+class PlayerBoost {
+public:
+  virtual ~PlayerBoost(); // 8057811c
+  PlayerBoost(); // 80588d28
+  void reset(); // 80588d74
+  bool activate(uint32_t type, int16_t frames); // 80588db0
+  void cancelAll(); // 80588e18
+  bool update(bool *unk0); // 80588e24
+
+  // vtable 808b5fd8
+  int16_t frames[6];
+  uint16_t types; // bit flags:
+    /*
+      0 mt, ssmt, start boost
+      1 unused (intended for star)
+      2 mushroom, boost panel
+      3 unused (intended for bullet)
+      4 trick, zipper
+      5 unused (intended for mega and tc)
+    */
+  // unknown 0x11 - 0x12
+  float multiplier;
+  float acceleration;
+  // unknown float 0x1c
+  float speedLimit;
+}; // total size 0x24
+
 class PlayerSub10 {
 public:
   virtual ~PlayerSub10(); // 80587b78
@@ -55,6 +118,7 @@ public:
   updateManualDrift(); // 8057dc44
   updateAutoDrift(); // 8057e0dc
   activateMushroom(); // 8057f3d8
+  endTrick(); // 8057f7a8
   applyLightning(); // 80580438
   applyLightningEffect(int frames, int unk0, int unk1); // 80580778
   applyStartBoost(int frames); // 8058212c
@@ -91,10 +155,10 @@ public:
   // unknown VEC3 0xa4
   float speedRatioCapped; // to 1
   float speedRatio;
-  // unknown float 0xb8
-  float rotationFactor;
   float kclSpeedFactor;
-  float kclHandlingMalus;
+  float kclRotFactor;
+  float kclFloorSpeedFactor;
+  float kclFloorRotFactor;
   // unknown 0xc8 - 0xdf
   VEC3 hopDir;
   // unknown 0xec - 0xf3
@@ -104,22 +168,12 @@ public:
   int16_t mtCharge;
   int16_t mtCharge2; // second one used by karts
   int16_t mtBoost;
-  // unknown 0x104 - 0x10b
-  int16_t allMTBoost; // also includes the boost from a SSMT and the start boost
-  // unknown uint16_t 0x10e
-  int16_t mushroomBoost;
-  // unknown uint16_t 0x112
-  int16_t trickBoost;
-  // unknown uint16_t 0x116
-  uint16_t boostType; 
-  // unknown 0x11a - 0x11b
-  float boostMultiplier; // this gets multiplied with nextspeed which will be the next speed
-  float boostAcceleration;
-  // unknown 0x124 - 0x12b
+  // unknown float 0x104
+  PlayerBoost boost;
   int16_t zipperBoost;
   int16_t zipperBoostMax;
   // unknown 0x130 - 0x147
-  int16_t multiBoost; // at least for zippers and mushrooms
+  int16_t offroadInvincibilityFrames;
   // unk uint16_t 0x14a
   uint16_t ssmtCharge;
   // unknown 0x14e - 0x157
@@ -141,11 +195,21 @@ public:
   int16_t crushTimer; // 0x192, timer for being crushed by Thwomp & Mega
   int16_t MegaTimer; // 0x194, timer for Mega mushroom
   // unknown 0x196 - 0x1C3
-  uint16_t zipperBoost2;
+  int16_t rampBoost;
   // unknown 0x1C6 - 0x248
   uint32_t drivingDirection; // 0: forwards, 1: braking, 2: waiting on the backwards counter, 3: backwards
   uint16_t backwardsAllowCounter;
-  // unknown 0x24e - 0x287
+  // unknown 0x24e - 0x24f
+  uint32_t specialFloor; // bit flags:
+    /*
+      0 boost panel
+      1 boost ramp
+      2 jump pad
+    */
+  // unknown 0x254 - 0x257
+  PlayerTrick *trick;
+  PlayerZipper *zipper;
+  // unknown 0x260 - 0x287
   float rawTurn;
   // unknown float 0x28c
   int16_t ghostVanishTimer;
@@ -257,15 +321,20 @@ public:
       24 stick right
       28 drift (auto)
       29 wheelie
+      31 ramp boost
     */
   uint32_t bitfield1; // bit flags:
     /*
+       0 hit by an item or an object
        1 first frame of respawn
        3 first frame of cannon
        4 in cannon
-       7 multi boost (zipper, mushroom)
+       5 first frame of trick
+       7 offroad invincibility
+      10 over a zipper
       13 zipper boost
       20 mt boost
+      22 in a trick
       31 in a star
     */
   uint32_t bitfield2; // bit flags:
@@ -276,6 +345,8 @@ public:
       15 in a mega
       16 crushed
       27 in a bullet
+      28 ink applied
+      29 has a tc
     */
   uint32_t bitfield3; // bit flags:
     /*
