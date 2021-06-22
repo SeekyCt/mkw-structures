@@ -5,6 +5,7 @@ Contributors:
   stebler (main documentation)
   SwareJonge (extra methods and attributes)
   1superchip (extra timer attributes, correcting some signing of types)
+  CLF78 (helped with jump pads)
 References:
   http://wiki.tockdom.com/wiki/BSP_(File_Format)
   http://wiki.tockdom.com/wiki/KartParam.bin
@@ -14,49 +15,13 @@ References:
 
 typedef struct {
   float x, y, z;
-} VEC3; // total size 0xc
+} Vec3; // total size 0xc
 
 typedef struct {
   float x, y, z, w;
-} VEC4; // total size 0x10
+} Quat; // total size 0x10
 
-typedef float MAT34[3][4];
-
-class PlayerTrick {
-public:
-  virtual ~PlayerTrick(); // 80575aa8
-  // unknown virtual functions 1 - 2
-  virtual void updateRot(); // 805764fc
-  PlayerTrick(); // 80575a44
-  void tryStart(VEC3 *unk0); // 80575d7c
-  void update(); // 805763e4
-
-  PlayerPointers *pointers;
-  // unknown 0x4 - 0xb
-  // vtable 808b58b0
-  // unknown 0x10 - 0x13
-  int type; // 0: stunt, 1: single flip, 2: double flip
-  // unknown 0x18 - 0x4f
-}; // total size 0x50
-
-class PlayerTrickBike : PlayerTrick {
-public:
-  virtual ~PlayerTrickBike(); // 80576afc
-  virtual void updateRot(); // 80576994
-
-  // vtable 808b5890
-}; // total size 0x50
-
-class PlayerZipper {
-public:
-  virtual ~PlayerZipper(); // 80574170
-  PlayerZipper(); // 80574114
-  void update(); // 80574340
-
-  PlayerPointers *pointers;
-  // unknown 0x4 - 0xb
-  // vtable 808b5798
-}; // total size 0x90
+typedef float Mat34[3][4];
 
 class PlayerBoost {
 public:
@@ -85,6 +50,93 @@ public:
   float speedLimit;
 }; // total size 0x24
 
+typedef struct {
+  float minSpeed;
+  float maxSpeed;
+  float velY;
+} JumpPadProperties; // total size 0xc
+
+typedef enum : int32_t {
+  STUNT_TRICK_BASIC = 0,
+  BIKE_FLIP_TRICK_X_NOSE = 1,
+  BIKE_FLIP_TRICK_X_TAIL = 2,
+  FLIP_TRICK_Y_LEFT = 3,
+  FLIP_TRICK_Y_RIGHT = 4,
+  KART_FLIP_TRICK_Z = 5,
+  BIKE_SIDE_STUNT_TRICK = 6,
+} TrickType;
+
+typedef enum : int32_t {
+  STUNT = 0,
+  SINGLE_FLIP = 1,
+  DOUBLE_FLIP = 2,
+} TrickCategory;
+
+typedef struct {
+  float initialAngleDiff;
+  float minAngleDiff;
+  float minAngleDiffMul;
+  float angleDiffMulDec;
+} TrickProperties; // total size 0x10
+
+class PlayerTrick {
+public:
+  virtual ~PlayerTrick(); // 80575aa8
+  virtual void start(Vec3 *left); // 80575ee8
+  virtual void startInner(TrickCategory category); // 8057616c
+  // unknown virtual functions 1 - 2
+  virtual void updateRot(); // 805764fc
+
+  PlayerTrick(); // 80575a44
+  void updateNext(); // 80575b38
+  void tryStart(Vec3 *left); // 80575d7c
+  void update(); // 805763e4
+  void end(); // 805766b8
+
+  PlayerPointers *pointers;
+  // unknown 0x4 - 0xb
+  // vtable 808b58b0
+  TrickType type;
+  TrickCategory category;
+  byte nextDirection;
+  // unknown 0x19
+  int16_t nextTimer;
+  float rotDir;
+  TrickProperties *properties;
+  float angle;
+  float angleDiff;
+  float angleDiffMul;
+  float angleDiffMulDec;
+  float maxAngle;
+  int16_t cooldown;
+  bool boostRampEnabled;
+  // unknown 0x3b
+  Quat rot;
+  PlayerSub10 *playerSub10;
+}; // total size 0x50
+
+class PlayerTrickBike : PlayerTrick {
+public:
+  virtual ~PlayerTrickBike(); // 80576afc
+  virtual void start(Vec3 *left); // 80576758
+  virtual void startInner(TrickCategory category); // 8057689c
+  virtual void updateRot(); // 80576994
+
+  // vtable 808b5890
+}; // total size 0x50
+
+class PlayerZipper {
+public:
+  virtual ~PlayerZipper(); // 80574170
+  PlayerZipper(); // 80574114
+  void update(); // 80574340
+  void end(int unk0); // 805758e4
+
+  PlayerPointers *pointers;
+  // unknown 0x4 - 0xb
+  // vtable 808b5798
+}; // total size 0x90
+
 class PlayerSub10 {
 public:
   virtual ~PlayerSub10(); // 80587b78
@@ -93,12 +145,13 @@ public:
   // unknown virtual function 3
   virtual activateStar(); // 80580268
   virtual activateMega(); // 80580b14
-  applyInk(int unk); // 80581a58
-  // unknown virtual functions 7-12
+  virtual applyInk(int unk); // 80581a58
+  // unknown virtual functions 7-11
+  virtual void cancelWheelie(); // 8057dc40
   virtual bool checkWheelie(); // 80589744
   virtual updateTurn(); // 8057a8b4
   virtual updateVehicleSpeed(); // 8057ab68
-  virtual updateTopDuringAirtime(); // 8057d888
+  virtual updateUpsWhileAirborne(); // 8057d888
   virtual updateVehicleRotationVector(float turn); // 8057cf0c
   virtual float getWheelieSoftSpeedLimitBonus(); // 8057c3c8
   virtual updateWheelie(); // 8058758c
@@ -110,23 +163,38 @@ public:
   PlayerSub10(); // 80577fc4
   init(bool unk0, bool unk1); // 805784d4
   update(); // 805788dc
+  updateHopPhysics(); // 80579968
   updateDir(); // 8057a140
   updateAcceleration(); // 8057b9bc
+  updateOffroad(); // 8057c3d4
   updateRotation(); // 8057c69c
   updateStandstillBoostRot(); // 8057d1d4
-  updateTop(); // 8057d398
+  updateUps(); // 8057d398
   updateManualDrift(); // 8057dc44
   updateAutoDrift(); // 8057e0dc
+  updateHopAndSlipdrift(); // 8057e804
   activateMushroom(); // 8057f3d8
   endTrick(); // 8057f7a8
+  activateZipperBoost(); // 8057f96c
+  tryStartJumpPad(); // 8057fd18
   applyLightning(); // 80580438
   applyLightningEffect(int frames, int unk0, int unk1); // 80580778
+  activateTc(); // 80581a28
+  deactivateTc(); // 80581a40
+  updateInk(); // 80581b1c
   applyStartBoost(int frames); // 8058212c
+  tryEndJumpPad(); // 80582530
+  updateBoost(); // 80582694, always inlined
   releaseMt(int unk0, int unk1); // 80582f9c
-  setInitialPhysicsValues(VEC3 *position, VEC3 *angles); // 80584044
+  updateStickyRoad(); // 80583b88
+  setInitialPhysicsValues(Vec3 *position, Vec3 *angles); // 80584044
+  doRespawn(); // 80584334
+  enterCannon(); // 8058498c
+  updateCannon(); // 80584d58
   activateBullet(int unk); // 805858ac
   updateDiving(); // 805869dc
   updateSlipstream(); // 80586fa8
+  updateSpecialFloor(); // 80587590, always inlined
 
   PlayerPointers *playerPointers;
   // unknown pointers 0x4, 0x8
@@ -141,34 +209,40 @@ public:
   float hardSpeedLimit;
   float acceleration;
   float speedDragMultiplier;
-  // unknown VEC3 0x38
-  VEC3 top;
-  // unknown VEC3 0x50
-  VEC3 dir;
-  VEC3 lastDir;
-  VEC3 vehicleSpeedDir;
-  // unknown VEC3 0x80
-  VEC3 dirDiff;
-  // unknown uint8_t 0x98
+  Vec3 smoothedUp;
+  Vec3 up;
+  Vec3 landingDir;
+  Vec3 dir;
+  Vec3 lastDir;
+  Vec3 vel1Dir;
+  // unknown Vec3 0x80
+  Vec3 dirDiff;
+  bool hasLandingDir;
   // unknown 0x99 - 0x9b, likely padding
-  // unknown floats 0x9c, 0xa0
-  // unknown VEC3 0xa4
+  float outsideDriftAngle;
+  float landingAngle;
+  Vec3 outsideDriftLastDir;
   float speedRatioCapped; // to 1
   float speedRatio;
   float kclSpeedFactor;
   float kclRotFactor;
-  float kclFloorSpeedFactor;
-  float kclFloorRotFactor;
-  // unknown 0xc8 - 0xdf
-  VEC3 hopDir;
-  // unknown 0xec - 0xf3
-  float divingRotation;
-  // unknown float 0xf8
-  int16_t driftState; // 1: charging mt, 2: mt charged
+  float kclWheelSpeedFactor;
+  float kclWheelRotFactor;
+  int16_t flooorCollisionCount;
+  // unknown 0xca - 0xcb
+  int hopStickX;
+  int hopFrame;
+  Vec3 hopUp;
+  Vec3 hopDir;
+  int slipstreamCharge;
+  // unknown float 0xf0
+  float divingRot;
+  float boostRot;
+  int16_t driftState; // 1: charging mt, 2: mt charged, 3: smt charged
   int16_t mtCharge;
-  int16_t mtCharge2; // second one used by karts
+  int16_t smtCharge;
   int16_t mtBoost;
-  // unknown float 0x104
+  float outsideDriftBonus;
   PlayerBoost boost;
   int16_t zipperBoost;
   int16_t zipperBoostMax;
@@ -177,10 +251,10 @@ public:
   // unk uint16_t 0x14a
   uint16_t ssmtCharge;
   // unknown 0x14e - 0x157
-  float realTurn;
-  float weightedTurn;
+  float effectiveTurn;
+  float conservedTurn;
   // float playerSize perhaps?
-  VEC3 scale;
+  Vec3 scale;
   // unknown float 0x170
   float someScale;
   float shockSpeedMultiplier;
@@ -194,9 +268,17 @@ public:
   // unknown 0x191
   int16_t crushTimer; // 0x192, timer for being crushed by Thwomp & Mega
   int16_t MegaTimer; // 0x194, timer for Mega mushroom
-  // unknown 0x196 - 0x1C3
+  // unknown 0x196 - 0x1af
+  float jumpPadMinSpeed;
+  float jumpPadMaxSpeed;
+  // unknown floats 0x1b8, 0x1bc
+  JumpPadProperties jumpPadProperties;
   int16_t rampBoost;
-  // unknown 0x1C6 - 0x248
+  // unknown 0x1c6 - 0x227
+  float hopVelY;
+  float hopPosY;
+  float hopGravity;
+  // unknown 0x234 - 0x248
   uint32_t drivingDirection; // 0: forwards, 1: braking, 2: waiting on the backwards counter, 3: backwards
   uint16_t backwardsAllowCounter;
   // unknown 0x24e - 0x24f
@@ -228,6 +310,7 @@ class PlayerSub10Bike : PlayerSub10 {
 public:
   virtual ~PlayerSub10Bike(); // 80589704
   virtual setTurnParams(); // 80587c54
+  virtual void cancelWheelie(); // 80588b30
   virtual bool checkWheelie(); // 80588fe0
   virtual updateVehicleRotationVector(float turn); // 80587d68
   virtual getWheelieSoftSpeedLimitBonus(); // 80588324
@@ -236,12 +319,12 @@ public:
   virtual startWheelie(); // 80588350
   virtual cancelWheelie(); // 805883c4
   // unknown virtual function 26
-  PlayerSub10Bike(); // 808b5ee8
+  PlayerSub10Bike(); // 80587b30
 
   // vtable 808b5ee8
-  float turnRotZ;
-  // unknown float 0x298
-  float turnRotZInc;
+  float leanRot;
+  float leanRotCap;
+  float leanRotInc;
   float wheelieRot;
   float maxWheelieRot;
   uint32_t wheelieTimer;
@@ -267,10 +350,13 @@ class PlayerSub14 {
 
 class PlayerSub18 {
 public:
-  // unknown virtual functions 0-1
+  virtual void processVehicleBodyCollision(CollisionData *collisionData, Hitbox *hitbox, void *unk, KclFlags *kclFlags); // 8056e764
+  virtual void processWheelCollision(CollisionData *collisionData, Hitbox *hitbox, void *unk, KclFlags *kclFlags); // 8056e8d4
   virtual ~PlayerSub18(); // 80573ff0
 
   PlayerSub18(); // 8056e56c
+  void processMovingRoad(CollisionData *collisionData, KclFlags *kclFlags); // 8056e930
+  processFloor(CollisionData *collisionData, Hitbox *hitbox, void *unk, KclFlags *kclFlags, bool allowBoostPanels); // 8056ea04
   checkPlayerCollision(PlayerPointers **otherPlayer); // 8056f7f0
   checkItemCollision(); // 8057257c
   updateCollisions(); // 80572c20
@@ -284,13 +370,23 @@ public:
   int handleFibCollision(); // 8057325c
   activeOob(int unk0, int unk1, int unk2, int unk3); // 80573b00
   updateRespawn(); // 80573ed4
-  updateCollisionsInner(float unk0, float unk1, uint32_t playerIdx, PlayerPhysics *playerPhysics, collisionGroup *collisionGroup, VEC4 *rotation, VEC3 *scale, bool enableHwg, VEC3 *unk2); // 805b6724
+  updateCollisionsInner(float unk0, float unk1, uint32_t playerIdx, PlayerPhysics *playerPhysics, collisionGroup *collisionGroup, Quat *rotation, Vec3 *scale, bool enableHwg, Vec3 *unk2); // 805b6724
 
   // vtable 808b56a8
   PlayerPointers *playerPointers;
-  // unknown 0x8 - 0x47
+  // unknown 0x8 - 0x2b
+  uint32_t surfaceProperties; // bit flags:
+    /*
+       0: wall
+       1: solid oob
+       4: boost ramp
+       6: offroad
+       8: boost panel or ramp
+      11: trickable
+    */
+  // unknown 0x30 - 0x47
   int16_t preRespawnTimer;
-  int16_t oobTimer;
+  int16_t solidOobTimer;
   // unknown 0x4c - 0x73
 }; // Total size 0x74
 
@@ -307,20 +403,29 @@ public:
     /*
        0 accelerate
        1 brake
-       2 hop
+       2 drift input
        3 drift (manual)
        4 oob, before being respawned
+       5 wall 3 collision
+       6 wall collision
        7 first frame of hop
        8 first frame of acceleration
+       9 first frame of groundtime
+      10 floor collision with the vehicle body
       11 floor collision with any wheel
       12 floor collision with all wheels
       13 stick left
+      15 airtime > 20
+      16 sticky road
       18 ground
       19 hop
       20 boost
       24 stick right
+      26 mushroom boost
+      27 charging a slipstream
       28 drift (auto)
       29 wheelie
+      30 jump pad enabled
       31 ramp boost
     */
   uint32_t bitfield1; // bit flags:
@@ -330,20 +435,26 @@ public:
        3 first frame of cannon
        4 in cannon
        5 first frame of trick
+       6 in a trick
        7 offroad invincibility
       10 over a zipper
       13 zipper boost
+      15 zipper trick
       20 mt boost
       22 in a trick
+      30 on a trickable surface
       31 in a star
     */
   uint32_t bitfield2; // bit flags:
     /*
        0 charging a slipstream
        1 in a slipstream
+       4 wheelie rotation
        7 shocked
       15 in a mega
       16 crushed
+      18 stopped
+      19 vanished
       27 in a bullet
       28 ink applied
       29 has a tc
@@ -365,16 +476,23 @@ public:
   // unknown pointer 0x18, contains a pointer to PlayerPointers
   uint32_t airtime;
   // unknown 0x20 - 0x27
-  VEC3 top;
-  // unknown VEC3 0x34
+  Vec3 floorNor;
+  // unknown Vec3 0x34
   // unknown 0x40 - 0x6b
   int32_t hwgTimer;
-  // unknown 0x70 - 0x87
+  // unknown 0x70 - 0x73
+  uint32_t boostRampType;
+  uint32_t jumpPadType;
+  // unknown 0x7c - 0x7f
+  uint32_t cnptId;
+  // unknown 0x84 - 0x87
   float stickX;
   float stickY;
   // unknown 0x90 - 0x9b
   float startBoostCharge;
   int32_t startBoostIdx; // -1 when burning out
+  // unknown 0xa4 - 0xa5
+  int16_t trickableTimer;
   // unknown 0xa4 - 0xbf
 }; // Total size 0xc0
 
@@ -405,30 +523,34 @@ public:
   initInertia1(); // 805b4e84
   reset(); // 805b4d24
   update(float one, float maxSpeed, bool unknown); // 805b5170
-  applyWheelSuspension(VEC3 *unk0, VEC3 *normalAcceleration, VEC3 *unk1, bool unk2); // 805b6150
+  applyWheelSuspension(Vec3 *unk0, Vec3 *normalAcceleration, Vec3 *unk1, bool unk2); // 805b6150
 
   // vtable 808b7314
-  MAT34 inertiaTensor;
-  MAT34 invInertiaTensor;
+  Mat34 inertiaTensor;
+  Mat34 invInertiaTensor;
   float rotationSpeed;
-  VEC3 position;
-  VEC3 gravitySpeed; // speed caused by gravity and normal force
-  // unknown VEC3 0x80, 0x8c, 0x98
-  VEC3 rotVec0; // contains drift, diving and wheel rotation
-  VEC3 speed2;
-  VEC3 rotVec1;
-  VEC3 speed3;
-  VEC3 speed; // sum of gravitySpeed, engineSpeed, speed2 and speed3
+  Vec3 position;
+  Vec3 vel0; // speed caused by gravity and normal force
+  // unknown Vec3 0x80, 0x8c, 0x98
+  Vec3 rotVec0; // contains drift, diving and wheel rotation
+  Vec3 vel2;
+  Vec3 rotVec1;
+  Vec3 vel3;
+  Vec3 vel; // sum of vel0, vel1, vel2 and vel3
   float speedNorm;
-  VEC3 rotVec2;
-  VEC4 rotation0; // as a quaternion
-  VEC4 rotation1; // this is probably the next or the previous rotation
-  // unknown VEC3 0x110
-  VEC3 wheelRotVec;
-  // unknown VEC4 0x128, 0x138
+  Vec3 rotVec2;
+  Quat mainRot;
+  Quat fullRot; // also includes specialRot
+  Vec3 normalAcceleration;
+  Vec3 normalRotVec;
+  Quat specialRot; // e.g. trick
+  // unknown Quat 0x138
   float gravity; // 1.3f most of the time
-  VEC3 engineSpeed; // speed caused by the vehicle engine
-  // unknown 0x158 - 0x1b3
+  Vec3 vel1; // speed caused by the vehicle engine
+  // unknown 0x158 - 0x177
+  float stabilizationFactor;
+  Vec3 speed1Adj;
+  // unknown 0x180 - 0x1b3
 }; // Total size 0x1b4
 
 class PlayerPhysicsBike : PlayerPhysics {
@@ -443,34 +565,49 @@ class CollisionData {
 public:
   CollisionData(); // 805b821c
 
-  // unknown 0x0 - 0x3
-  VEC3 normal;
-  VEC3 floorNormal;
-  // unknown VEC3 0x1c, 0x28, 0x34
-  VEC3 position;
-  // unknown VEC3 0x4c, 0x58
-  // unknown 0x64 - 0x83
+  uint32_t types; // bit flags:
+    /*
+      0 floor
+      1 wall
+      2 invisible wall
+      3 trickable
+      6 wall 3
+    */
+  Vec3 nor;
+  Vec3 floorNor;
+  // unknown Vec3 0x1c, 0x28
+  Vec3 vel;
+  Vec3 relPos;
+  Vec3 movement;
+  // unknown Vec3 0x58
+  float speedFactor;
+  float rotFactor;
+  uint32_t closestFloorFlags;
+  uint32_t closestFloorSettings;
+  // unknown 0x74 - 0x7b
+  uint32_t intensity
+  // unknown 0x80 - 0x83
 }; // Total size 0x84
 
 class Hitbox {
 public:
   Hitbox(); // 805b7f48
   reset(); // 808b7f84
-  update(float scale0, float scale1, VEC3 *scale, VEC4 *rotation, VEC3 *centerPosition); // 805b7fbc
+  update(float scale0, float scale1, Vec3 *scale, Quat *rotation, Vec3 *centerPosition); // 805b7fbc
 
   void *bspHitbox; // http://wiki.tockdom.com/wiki/BSP_(File_Format)
   float radius;
   // unknown int32_t 0x8
-  VEC3 position;
-  VEC3 lastPosition;
-  // unknown VEC3 0x24
+  Vec3 position;
+  Vec3 lastPosition;
+  // unknown Vec3 0x24
 }; // Total size 0x30
 
 class HitboxGroup {
 public:
   HitboxGroup(); // 805b82bc
   HitboxGroup(BspHitbox *hitboxes); // 805b84c0
-  HitboxGroup(float radius, VEC3 *position); // 805b875c
+  HitboxGroup(float radius, Vec3 *position); // 805b875c
   updateBoundingRadius(); // 805b883c
   reset(); // 805b8330
 
@@ -494,12 +631,12 @@ public:
   PlayerPhysics *playerPhysics;
   HitboxGroup *hitboxGroup;
   // unknown 0xc - 0x17
-  VEC3 position;
-  // unknown VEC4 0x24, 0x34, 0x44, 0x54, 0x64, 0x74
+  Vec3 position;
+  // unknown Quat 0x24, 0x34, 0x44, 0x54, 0x64, 0x74
   // unknown 0x84 - 0x9b
-  // unknown MAT34 0x9c
-  // unknown VEC3 0xcc, 0xd8, 0xe4
-  VEC3 speed;
+  // unknown Mat34 0x9c
+  // unknown Vec3 0xcc, 0xd8, 0xe4
+  Vec3 speed;
   // unknown float 0xfc
 }; // Total size 0x100
 
@@ -509,24 +646,24 @@ public:
 
   // unknown 0x0 - 0xb
   // vtable 808b6450
-  // unknown VEC3 0x10
-  // unknown MAT34 0x1c
-  // unknown MAT34 0x4c
+  // unknown Vec3 0x10
+  // unknown Mat34 0x1c
+  // unknown Mat34 0x4c
   // unknown 0x7c - 0x8b
 }; // Total size 0x8c
 
 class PlayerGraphics : 3DObject { // tentative name
 public:
-  getWheelMatrixBike(MAT34 *wheelMatrix, uint32_t wheelIdx); // 8056dd54
+  getWheelMatrixBike(Mat34 *wheelMatrix, uint32_t wheelIdx); // 8056dd54
 
   // unknown 0x8c - 0x8f
   PlayerPhysicsHolder *playerPhysicsHolder;
   // unknown float angle 0x94
   // unknown vec3 0x98
   // unknown 0xa4 - 0xa7
-  // unknown MAT34 0xa8 and 0xd8, generated from kartDriverDispParam
+  // unknown Mat34 0xa8 and 0xd8, generated from kartDriverDispParam
   // unknown 0x108 - 0x167
-  // unknown MAT34 0x168 and 0x198, also generated from KartDriverDispParam
+  // unknown Mat34 0x168 and 0x198, also generated from KartDriverDispParam
   // unknown 0x1c8 - 0x22f
   float wheelForwardRotationSpeed; // from KartPartsDispParam/BikePartsDispParam
   float wheelBackwardRotationSpeed; // same
@@ -581,7 +718,7 @@ class WheelPhysics {
 public:
   WheelPhysics(uint32_t wheelIdx, uint32_t bspWheelIdx); // 8059940c
   initHitboxGroup(); // 80599470
-  realign(VEC3 *bottomDirection, VEC3 *unknown); // 80599ad0
+  realign(Vec3 *bottomDirection, Vec3 *unknown); // 80599ad0
 
   PlayerPointers *playerPointers;
   // unknown pointers 0x4, 0x8
@@ -590,19 +727,19 @@ public:
   uint32_t bspWheelIdx;
   void *bspWheel; // http://wiki.tockdom.com/wiki/BSP_(File_Format)
   HitboxGroup *hitboxGroup;
-  VEC3 position;
-  // unknown VEC3 0x2c
-  VEC3 lastSpeed;
+  Vec3 position;
+  // unknown Vec3 0x2c
+  Vec3 lastSpeed;
   float posY;
-  // unknown VEC3 0x48, 0x54, 0x60, 0x6c
-  VEC3 topmostPosition;
+  // unknown Vec3 0x48, 0x54, 0x60, 0x6c
+  Vec3 topmostPosition;
 }; // Total size 0x84
 
 class WheelPhysicsHolder {
 public:
   WheelPhysicsHolder(uint32_t wheelIdx, bool xMirroredKart, uint32_t bspWheelIdx); // 80599ed4
-  update(float unknown, VEC3 *gravity, MAT34 *wheelMat); // 8059a278
-  applySuspensions(VEC3 *forwardDirection, VEC3 *unknown); // 8059a574
+  update(float unknown, Vec3 *gravity, Mat34 *wheelMat); // 8059a278
+  applySuspensions(Vec3 *forwardDirection, Vec3 *unknown); // 8059a574
 
   PlayerPointers *playerPointers;
   // unknown 0x4 - 0xb
@@ -612,10 +749,10 @@ public:
   uint32_t xMirroredKart;
   uint32_t bspWheelIdx;
   uint32_t wheelIdx;
-  VEC3 topmostPosition;
+  Vec3 topmostPosition;
   float slackY;
   // unknown 0x34 - 0x3b
-  VEC3 bottomDirection;
+  Vec3 bottomDirection;
 }; // Total size 0x48
 
 class Wheel0 : 3DObject {
@@ -659,16 +796,16 @@ public:
   PlayerPhysics *getPlayerPhysics(); // 805903cc
   PlayerPhysicsHolder *getPlayerPhysicsHolder(); // 805903ac
   HitboxGroup *getPlayerPhysicsHolderHitboxGroup(); // 805907d8
-  VEC3 *getPlayerPosition(); // 8059020c
+  Vec3 *getPlayerPosition(); // 8059020c
   Stats *getPlayerStats(); // 80590874
   PlayerSub *getPlayerSub(); // 805908d8
   PlayerSub *getPlayerSub(); // 80590764
   PlayerSub10 *getPlayerSub10(); // 8059077c
   PlayerSub14 *getPlayerSub14(); // 80590d20
   PlayerSub18 *getPlayerSub18(); // 8059084c
-  VEC3 *getScale(); // 805914bc
-  VEC3 *getSpeed(); // 80590d08
-  VEC3 *getSpeedRatioCapped(); // 80590dc0
+  Vec3 *getScale(); // 805914bc
+  Vec3 *getSpeed(); // 80590d08
+  Vec3 *getSpeedRatioCapped(); // 80590dc0
   VehicleType getVehicleType(); // 80590a10
   Wheel0 *getWheel0(uint32_t wheelIdx); // 805906b4
   Wheel1 *getWheel1(uint32_t wheelIdx); // 805906dc
@@ -679,8 +816,8 @@ public:
   WheelPhysicsHolder *getWheelPhysicsHolder(uint32_t wheelIdx); // 80590704
   bool isBike(); // 80590a6c
   bool isCpu(); // 80590664
-  setPlayerPosition(VEC3 *position); // 80590238
-  setPlayerRotation(VEC4 *rotation); // 80590288
+  setPlayerPosition(Vec3 *position); // 80590238
+  setPlayerRotation(Quat *rotation); // 80590288
 
   PlayerParams *params;
   PlayerSub1c *playerSub1c;
