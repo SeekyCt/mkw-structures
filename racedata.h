@@ -5,10 +5,11 @@ Contributors:
     Seeky (main documentation)
     TheLordScruffy (main documentation)
     WhatIsLoaf (ghost player type)
-    riidefi (ParameterFile - no longer public)
+    riidefi (ParameterFile)
+    CLF78 (local player count)
 References:
     http://wiki.tockdom.com/wiki/Mission_Mode#mission_single.kmt
-    https://github.com/riidefi/MKWDecompilation/blob/master/Static/System/ParameterFile.hpp
+    https://github.com/riidefi/mkw/blob/master/source/game/host_system/ParameterFile.hpp
 */
 
 typedef enum : int32_t {
@@ -124,7 +125,9 @@ class RacedataScenario {
 
     // vtable 808b3288
     uint8_t playerCount;
-    // unknown 0x5-7, 6 & 7 might be padding but 5 is set to 0 in constructor
+    // unknown 0x5
+    uint8_t localPlayerCount
+    // unknown 0x7
     RacedataPlayer players[12];
     RacedataSettings settings;
     KMTFile mission; // 0x70 struct, see http://wiki.tockdom.com/wiki/Mission_Mode#mission_single.kmt
