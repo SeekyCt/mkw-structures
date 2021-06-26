@@ -126,7 +126,7 @@ class RacedataScenario {
     // vtable 808b3288
     uint8_t playerCount;
     // unknown 0x5
-    uint8_t localPlayerCount
+    uint8_t localPlayerCount;
     // unknown 0x7
     RacedataPlayer players[12];
     RacedataSettings settings;
