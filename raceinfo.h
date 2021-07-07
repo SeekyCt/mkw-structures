@@ -65,7 +65,7 @@ class RaceinfoRandom : Random {
 
 class RaceinfoPlayer {
   virtual ~RaceinfoPlayer(); // 80532f48
-  RaceinfoPlayer(uint8_t id, uint32_t param_3); // 80533ed8
+  RaceinfoPlayer(uint8_t id, uint8_t lapCount); // 80533ed8
   updateGpRankScore(); // 805368f8
   
   // vtable 808b34a4
@@ -98,7 +98,7 @@ class RaceinfoPlayer {
       2 is end of race camera
       1 is in race?
     */
-  Timer * lapFinishTimes; // array of 12 for... some reason
+  Timer * lapFinishTimes; // array of lapCount length
   Timer * raceFinishTime;
   // 0x44-47 unknown
   ControllerHolder * controllerHolder; // see inputdata.h
